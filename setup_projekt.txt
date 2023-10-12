@@ -1,0 +1,29 @@
+Setup af AutoEind
+
+
+1. Klon Repositoriet:
+git clone https://github.com/oscargroenberg/program.git
+cd <dit-projekt-mappe>
+
+
+2. Installer virtualenv (hvis det ikke allerede er installeret):
+pip install virtualenv
+
+
+3. Opret et virtuelt miljø med virtualenv:
+virtualenv myenv
+
+
+4. Aktiver det virtuelle miljø:
+.\myenv\Scripts\activate
+
+
+5. Installer afhængigheder:
+pip install -r req.txt
+
+Yderligere bemærkninger:
+Sørg altid for, at det virtuelle miljø er aktiveret, før du kører projektet eller installerer pakker.
+
+Hvis du foretager ændringer i projektet og tilføjer nye pakker,
+skal du huske at opdatere req.txt filen ved hjælp af
+pip freeze > req.txt.
