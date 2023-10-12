@@ -1,9 +1,11 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QGraphicsColorizeEffect
+from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QGraphicsColorizeEffect, QComboBox, QLineEdit
 from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve
-from PyQt6.QtGui import QColor
+from PyQt6.QtGui import QColor, QRegularExpressionValidator
+from PyQt6.QtCore import QRegularExpression
 from PyQt6.QtCore import pyqtProperty
 from PyQt6.QtGui import QPalette
-from style import Colors, Sizing
+import json
+from style import Colors, Sizing, ComboBoxStyles, InputStyles
 
 class HoverButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -51,9 +53,6 @@ class HoverButton(QPushButton):
         self._color = color
         self.updateStyleSheet(color)
 
-
-
-
 class MyApp(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -70,6 +69,67 @@ class MyApp(QMainWindow):
             background-color: {Colors.SECONDARY_BACKGROUND_COLOR};
             border-radius: {Sizing.RADIUS}px;
         """)
+        
+        
+        
+        # Year Input Field
+        self.year_input = QLineEdit(self.box)
+        self.year_input.setPlaceholderText("Enter Year")
+        self.year_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.year_input.setGeometry(
+            int((self.box.width() - InputStyles.WIDTH) / 2),  # Centered horizontally
+            int(self.box.height() - 3 * Sizing.SUBMIT_BUTTON_HEIGHT - 40),  # Positioned above the ComboBoxes with a 10px margin
+            InputStyles.WIDTH,
+            InputStyles.HEIGHT
+        )
+        self.year_input.setStyleSheet(InputStyles.STYLESHEET)
+
+        # Year Input Field Validator
+        year_pattern = QRegularExpression(r"^\d{4}$")  # Regular expression for exactly 4 digits
+        year_validator = QRegularExpressionValidator(year_pattern)
+        self.year_input.setValidator(year_validator)
+
+        
+        
+        
+        # Calculate the starting x-coordinate for the ComboBoxes
+        start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 10) / 2)  # Centered horizontally with a 10px gap between ComboBoxes
+
+        # First ComboBox
+        self.combo1 = QComboBox(self.box)
+        self.combo1.setEditable(True)
+        self.combo1.lineEdit().setReadOnly(True)
+        self.combo1.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.combo1.setGeometry(
+            start_x,
+            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),  # Positioned above the button with a 10px margin
+            ComboBoxStyles.WIDTH,
+            ComboBoxStyles.HEIGHT
+        )
+        self.combo1.setStyleSheet(ComboBoxStyles.STYLESHEET)
+
+        # Second ComboBox (to the right of the first one with a 10px gap)
+        self.combo2 = QComboBox(self.box)
+        self.combo2.setEditable(True)
+        self.combo2.lineEdit().setReadOnly(True)
+        self.combo2.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.combo2.setGeometry(
+            start_x + ComboBoxStyles.WIDTH + 10,  # Add the width of the first ComboBox and the 10px gap
+            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),  # Positioned above the button with a 10px margin
+            ComboBoxStyles.WIDTH,
+            ComboBoxStyles.HEIGHT
+        )
+        self.combo2.setStyleSheet(ComboBoxStyles.STYLESHEET)
+        
+        # Load data from the JSON file
+        with open('months.json', 'r') as file:
+            months_data = json.load(file)
+
+        for month in months_data:
+            self.combo1.addItem(month["Month"], month["ID"])
+            self.combo2.addItem(month["Month"], month["ID"])
+        
+        
         
         self.submit_btn = HoverButton("Start", self.box)  # Use the custom HoverButton
         self.submit_btn.setGeometry(

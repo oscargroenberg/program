@@ -1,0 +1,50 @@
+[
+    {
+        "ID": "1",
+        "Month": "Jan"
+    },
+    {
+        "ID": "2",
+        "Month": "Feb"
+    },
+    {
+        "ID": "3",
+        "Month": "Mar"
+    },
+    {
+        "ID": "4",
+        "Month": "Apr"
+    },
+    {
+        "ID": "5",
+        "Month": "Maj"
+    },
+    {
+        "ID": "6",
+        "Month": "Jun"
+    },
+    {
+        "ID": "7",
+        "Month": "Jul"
+    },
+    {
+        "ID": "8",
+        "Month": "Aug"
+    },
+    {
+        "ID": "9",
+        "Month": "Sep"
+    },
+    {
+        "ID": "10",
+        "Month": "Okt"
+    },
+    {
+        "ID": "11",
+        "Month": "Nov"
+    },
+    {
+        "ID": "12",
+        "Month": "Dec"
+    }
+]
