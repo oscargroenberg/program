@@ -1,24 +1,24 @@
 Setup af AutoEind
 
 
-1. Klon Repositoriet:
+1. Klon Repositoriet(åben command prompt):
 git clone https://github.com/oscargroenberg/program.git
-cd <dit-projekt-mappe>
 
+2. Åben Visual Studio Code og åben en terminal derinde.
 
-2. Installer virtualenv (hvis det ikke allerede er installeret):
+3. Installer virtualenv (hvis det ikke allerede er installeret):
 pip install virtualenv
 
 
-3. Opret et virtuelt miljø med virtualenv:
+4. Opret et virtuelt miljø med virtualenv:
 virtualenv myenv
 
 
-4. Aktiver det virtuelle miljø:
+5. Aktiver det virtuelle miljø:
 .\myenv\Scripts\activate
 
 
-5. Installer afhængigheder:
+6. Installer afhængigheder:
 pip install -r req.txt
 
 Yderligere bemærkninger:
