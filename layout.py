@@ -4,8 +4,11 @@ from PyQt6.QtGui import QColor, QRegularExpressionValidator
 from PyQt6.QtCore import QRegularExpression
 from PyQt6.QtCore import pyqtProperty
 from PyQt6.QtGui import QPalette
+from PyQt6.QtWidgets import QListView
+from PyQt6.QtCore import pyqtSignal
 import json
 from style import Colors, Sizing, ComboBoxStyles, InputStyles
+
 
 class HoverButton(QPushButton):
     def __init__(self, *args, **kwargs):
@@ -52,6 +55,30 @@ class HoverButton(QPushButton):
     def color(self, color):
         self._color = color
         self.updateStyleSheet(color)
+       
+       
+class ClickableLineEdit(QLineEdit):
+    clicked = pyqtSignal()
+
+    def mouseReleaseEvent(self, event):
+        super().mouseReleaseEvent(event)
+        self.clicked.emit()
+
+ 
+class ClickableComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super(ClickableComboBox, self).__init__(parent)
+        self.setEditable(True)
+        self.setLineEdit(ClickableLineEdit(self))
+        self.lineEdit().clicked.connect(self.showPopup)
+        
+        # Adjust the viewport margins to match the border radius
+        listView = self.view()
+        listView.setViewportMargins(10, 0, 10, 0)  # Adjust the left and right margins to 10
+
+
+
+
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -93,33 +120,35 @@ class MyApp(QMainWindow):
         
         
         # Calculate the starting x-coordinate for the ComboBoxes
-        start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 10) / 2)  # Centered horizontally with a 10px gap between ComboBoxes
+        start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 10) / 2)
 
         # First ComboBox
-        self.combo1 = QComboBox(self.box)
+        self.combo1 = ClickableComboBox(self.box)
         self.combo1.setEditable(True)
         self.combo1.lineEdit().setReadOnly(True)
         self.combo1.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.combo1.setGeometry(
             start_x,
-            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),  # Positioned above the button with a 10px margin
+            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),
             ComboBoxStyles.WIDTH,
             ComboBoxStyles.HEIGHT
         )
         self.combo1.setStyleSheet(ComboBoxStyles.STYLESHEET)
+        self.combo1.setMaxVisibleItems(12)
 
-        # Second ComboBox (to the right of the first one with a 10px gap)
-        self.combo2 = QComboBox(self.box)
+        # Second ComboBox
+        self.combo2 = ClickableComboBox(self.box)
         self.combo2.setEditable(True)
         self.combo2.lineEdit().setReadOnly(True)
         self.combo2.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.combo2.setGeometry(
-            start_x + ComboBoxStyles.WIDTH + 10,  # Add the width of the first ComboBox and the 10px gap
-            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),  # Positioned above the button with a 10px margin
+            start_x + ComboBoxStyles.WIDTH + 10,
+            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),
             ComboBoxStyles.WIDTH,
             ComboBoxStyles.HEIGHT
         )
         self.combo2.setStyleSheet(ComboBoxStyles.STYLESHEET)
+        self.combo2.setMaxVisibleItems(12)
         
         # Load data from the JSON file
         with open('months.json', 'r') as file:
@@ -138,3 +167,7 @@ class MyApp(QMainWindow):
             Sizing.SUBMIT_BUTTON_WIDTH,
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
+    def showComboPopup(self, event):
+        sender = self.sender()
+        if sender:
+            sender.showPopup()

@@ -35,6 +35,9 @@ class Sizing:
 class ComboBoxStyles:
     WIDTH = Sizing.COMBOBOX_WIDTH
     HEIGHT = Sizing.COMBOBOX_HEIGHT
+    DROPDOWN_WIDTH = Sizing.COMBOBOX_WIDTH - 10  # Adjust as needed
+    HOVER_COLOR = "#e6e6e7"  # Background color when hovering
+
     STYLESHEET = f"""
         QComboBox {{
             background-color: {Colors.COMBOBOX_BACKGROUND_COLOR};
@@ -45,19 +48,70 @@ class ComboBoxStyles:
         }}
         QComboBox::drop-down {{
             width: 0px;
-            border: none;
         }}
         QComboBox::down-arrow {{
             image: none;
         }}
-        
+        QComboBox::indicator {{
+            width: 0px;
+            height: 0px;
+        }}
         QComboBox QAbstractItemView {{
-            border: 2px solid darkgray;
-            selection-background-color: #f01245;
-            background-color: #ffffff;
-            border-radius: 25px;
+            border: none;
+            background-color: transparent;
+            padding-left: 0px;
+            padding-right: 0px;
+            margin: 0px;
+            min-width: {DROPDOWN_WIDTH}px;  /* Adjust the width here */
+        }}
+        QComboBox QAbstractItemView::item {{
+            background-color: transparent;
+            padding: 5px 0px;
+            margin: 0px;
+            color: {Colors.DARK_TEXT_COLOR};  /* Set text color to black for normal items */
+        }}
+        QComboBox QAbstractItemView::item:selected {{
+            background-color: {HOVER_COLOR};
+            color: {Colors.DARK_TEXT_COLOR};  /* Text color for selected items */
+            outline: none;  /* Remove the dotted border when selected */
+        }}
+        QComboBox QAbstractItemView::item:hover {{
+            background-color: {HOVER_COLOR};
+            selection-background-color: {HOVER_COLOR};
+            border: none;
         }}
     """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class InputStyles:
