@@ -13,7 +13,6 @@ from style import Colors, Sizing, ComboBoxStyles, InputStyles, ButtonStyles, Box
 class HoverButton(QPushButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
         # Set up the color animation
         self._color = QColor(Colors.ACTION_COLOR)
         self.animation = QPropertyAnimation(self, b"color")
@@ -101,11 +100,6 @@ class MyApp(QMainWindow):
         self.box.setGeometry(25, 25, 300, 550)  # Setting the position and size of the box
         self.box.setStyleSheet(BoxStyles.STYLESHEET)
 
-        
-        
-        
-        
-        
         
         # Initial "Enter CVR Number" Input Field
         self.number_input = QLineEdit(self.box)
