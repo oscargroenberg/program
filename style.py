@@ -1,4 +1,5 @@
-class Colors: 
+# Colors
+class Colors:
     ACTION_COLOR = "#f01245"
     ACTION_HOVER_COLOR = "#003253"
     ACTION_HOVER_DURATION = 150
@@ -11,8 +12,9 @@ class Colors:
     
     COMBOBOX_BACKGROUND_COLOR = "#f2f2f3"
     COMBOBOX_BORDER_COLOR = "#d1d1d1"
+    HOVER_COLOR = "#e6e6e7"  # Background color when hovering
 
-
+# Sizing
 class Sizing:
     WINDOW_WIDTH = 1000
     WINDOW_HEIGHT = 600
@@ -27,15 +29,13 @@ class Sizing:
     
     COMBOBOX_WIDTH = 100
     COMBOBOX_HEIGHT = 50
-    
+    DROPDOWN_WIDTH = COMBOBOX_WIDTH - 20  # Adjust as needed
 
-    
+# ComboBox Styles
 class ComboBoxStyles:
     WIDTH = Sizing.COMBOBOX_WIDTH
     HEIGHT = Sizing.COMBOBOX_HEIGHT
     DROPDOWN_WIDTH = Sizing.COMBOBOX_WIDTH - 20  # Adjust as needed
-    HOVER_COLOR = "#e6e6e7"  # Background color when hovering
-
     STYLESHEET = f"""
         QComboBox {{
             background-color: {Colors.COMBOBOX_BACKGROUND_COLOR};
@@ -61,27 +61,27 @@ class ComboBoxStyles:
             padding-right: 0px;
             outline: 0px;
             margin: 0px;
-            min-width: {DROPDOWN_WIDTH}px;
-            max-width: {DROPDOWN_WIDTH}px;
+            min-width: {Sizing.DROPDOWN_WIDTH}px;
+            max-width: {Sizing.DROPDOWN_WIDTH}px;
         }}
         QComboBox QAbstractItemView::item {{
             background-color: transparent;
             padding: 0px 0px;
             margin: 0px;
-            color: {Colors.DARK_TEXT_COLOR};  /* Set text color to black for normal items */
+            color: {Colors.DARK_TEXT_COLOR};
         }}
         QComboBox QAbstractItemView::item:selected {{
-            background-color: {HOVER_COLOR};
-            color: {Colors.DARK_TEXT_COLOR};  /* Text color for selected items */
-            outline: none;  /* Remove the dotted border when selected */
+            background-color: {Colors.HOVER_COLOR};
+            color: {Colors.DARK_TEXT_COLOR};
         }}
         QComboBox QAbstractItemView::item:hover {{
-            background-color: {HOVER_COLOR};
-            selection-background-color: {HOVER_COLOR};
+            background-color: {Colors.HOVER_COLOR};
+            selection-background-color: {Colors.HOVER_COLOR};
             border: none;
         }}
     """
 
+# Input Styles
 class InputStyles:
     WIDTH = Sizing.INPUT_WIDTH
     HEIGHT = Sizing.INPUT_HEIGHT
@@ -95,11 +95,7 @@ class InputStyles:
         }}
     """
 
-
-
-
-
-
+# Button Styles
 class ButtonStyles:
     FONT_SIZE = 18
     FONT_WEIGHT = "bold"
@@ -111,4 +107,21 @@ class ButtonStyles:
             font-size: {FONT_SIZE}px;
             font-weight: {FONT_WEIGHT};
         }}
+    """
+
+# Box Styles
+class BoxStyles:
+    STYLESHEET = f"""
+        background-color: {Colors.SECONDARY_BACKGROUND_COLOR};
+        border-radius: {Sizing.RADIUS}px;
+    """
+
+# Remove Input Button Styles
+class RemoveInputButtonStyles:
+    STYLESHEET = """
+        background-color: transparent; 
+        color: red; 
+        font-size: 16px; 
+        font-weight: bold; 
+        border: none;
     """
