@@ -28,14 +28,12 @@ class Sizing:
     COMBOBOX_WIDTH = 100
     COMBOBOX_HEIGHT = 50
     
-    
-    
-    
+
     
 class ComboBoxStyles:
     WIDTH = Sizing.COMBOBOX_WIDTH
     HEIGHT = Sizing.COMBOBOX_HEIGHT
-    DROPDOWN_WIDTH = Sizing.COMBOBOX_WIDTH - 10  # Adjust as needed
+    DROPDOWN_WIDTH = Sizing.COMBOBOX_WIDTH - 20  # Adjust as needed
     HOVER_COLOR = "#e6e6e7"  # Background color when hovering
 
     STYLESHEET = f"""
@@ -61,12 +59,14 @@ class ComboBoxStyles:
             background-color: transparent;
             padding-left: 0px;
             padding-right: 0px;
+            outline: 0px;
             margin: 0px;
-            min-width: {DROPDOWN_WIDTH}px;  /* Adjust the width here */
+            min-width: {DROPDOWN_WIDTH}px;
+            max-width: {DROPDOWN_WIDTH}px;
         }}
         QComboBox QAbstractItemView::item {{
             background-color: transparent;
-            padding: 5px 0px;
+            padding: 0px 0px;
             margin: 0px;
             color: {Colors.DARK_TEXT_COLOR};  /* Set text color to black for normal items */
         }}
@@ -82,38 +82,6 @@ class ComboBoxStyles:
         }}
     """
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class InputStyles:
     WIDTH = Sizing.INPUT_WIDTH
     HEIGHT = Sizing.INPUT_HEIGHT
@@ -124,5 +92,23 @@ class InputStyles:
             border-radius: {Sizing.RADIUS}px;
             font-size: 16px;
             padding: 5px;
+        }}
+    """
+
+
+
+
+
+
+class ButtonStyles:
+    FONT_SIZE = 18
+    FONT_WEIGHT = "bold"
+    STYLESHEET = f"""
+        QPushButton {{
+            background-color: {Colors.ACTION_COLOR};
+            color: {Colors.LIGHT_TEXT_COLOR};
+            border-radius: {Sizing.RADIUS}px;
+            font-size: {FONT_SIZE}px;
+            font-weight: {FONT_WEIGHT};
         }}
     """

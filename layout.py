@@ -7,7 +7,7 @@ from PyQt6.QtGui import QPalette
 from PyQt6.QtWidgets import QListView
 from PyQt6.QtCore import pyqtSignal
 import json
-from style import Colors, Sizing, ComboBoxStyles, InputStyles
+from style import Colors, Sizing, ComboBoxStyles, InputStyles, ButtonStyles
 
 
 class HoverButton(QPushButton):
@@ -35,15 +35,7 @@ class HoverButton(QPushButton):
         super().leaveEvent(event)
 
     def updateStyleSheet(self, color):
-        button_style = f"""
-            QPushButton {{
-                background-color: {color.name()};
-                color: {Colors.LIGHT_TEXT_COLOR};
-                border-radius: {Sizing.RADIUS}px;
-                font-size: 18px;
-                font-weight: bold;
-            }}
-        """
+        button_style = ButtonStyles.STYLESHEET.replace(Colors.ACTION_COLOR, color.name())
         self.setStyleSheet(button_style)
 
 
@@ -66,15 +58,29 @@ class ClickableLineEdit(QLineEdit):
 
  
 class ClickableComboBox(QComboBox):
+    DROPDOWN_WIDTH = ComboBoxStyles.DROPDOWN_WIDTH  # Define the DROPDOWN_WIDTH here
+
     def __init__(self, parent=None):
         super(ClickableComboBox, self).__init__(parent)
         self.setEditable(True)
         self.setLineEdit(ClickableLineEdit(self))
         self.lineEdit().clicked.connect(self.showPopup)
         
-        # Adjust the viewport margins to match the border radius
+        # Adjust the viewport margins to remove the space around the list items
         listView = self.view()
-        listView.setViewportMargins(10, 0, 10, 0)  # Adjust the left and right margins to 10
+        listView.setViewportMargins(0, 0, 0, 0)  # Set all margins to 0
+
+    def showPopup(self):
+        popup = self.view().parentWidget()  # This gets the viewport's parent, which is the actual dropdown popup
+        popup.setFixedWidth(self.DROPDOWN_WIDTH)
+        super().showPopup()
+
+        # Calculate the offset needed to center the dropdown
+        offset = int((self.width() - self.DROPDOWN_WIDTH) / 2)
+        popup.move(popup.x() + offset, popup.y())
+
+
+
 
 
 
@@ -120,7 +126,7 @@ class MyApp(QMainWindow):
         
         
         # Calculate the starting x-coordinate for the ComboBoxes
-        start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 10) / 2)
+        start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 15) / 2)  # Adjusted spacing from 10 to 12
 
         # First ComboBox
         self.combo1 = ClickableComboBox(self.box)
@@ -142,13 +148,14 @@ class MyApp(QMainWindow):
         self.combo2.lineEdit().setReadOnly(True)
         self.combo2.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.combo2.setGeometry(
-            start_x + ComboBoxStyles.WIDTH + 10,
+            start_x + ComboBoxStyles.WIDTH + 15,  # Adjusted spacing from 10 to 12
             int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),
             ComboBoxStyles.WIDTH,
             ComboBoxStyles.HEIGHT
         )
         self.combo2.setStyleSheet(ComboBoxStyles.STYLESHEET)
         self.combo2.setMaxVisibleItems(12)
+
         
         # Load data from the JSON file
         with open('months.json', 'r') as file:
