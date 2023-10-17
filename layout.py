@@ -110,7 +110,7 @@ class MyApp(QMainWindow):
 
         
         # Load data from the JSON file
-        with open('months.json', 'r') as file:
+        with open('C:/Users/oscar/Desktop/visma/months.json', 'r') as file:
             months_data = json.load(file)
 
         for month in months_data:
