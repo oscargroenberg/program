@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox
+from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel
 from PyQt6.QtCore import Qt, QRegularExpression
 from PyQt6.QtGui import QRegularExpressionValidator
 import json
@@ -16,6 +16,7 @@ class MyApp(QMainWindow):
     def init_ui(self):
         self.setup_window()
         self.setup_box()
+        self.setup_title()  # Ensure the title setup is after the box setup
         self.setup_number_input()
         self.setup_add_cvr_button()
         self.setup_year_input()
@@ -30,6 +31,18 @@ class MyApp(QMainWindow):
         self.box = QWidget(self)
         self.box.setGeometry(25, 25, 300, 550)
         self.box.setStyleSheet(BoxStyles.STYLESHEET)
+
+    def setup_title(self):
+        self.title_label = QLabel("Form", self.box)  # Parented the label to the box
+        title_width = 200
+        title_height = 40
+        title_x = int((self.box.width() - title_width) / 2)
+        title_y = 10  # Top of the box
+        self.title_label.setGeometry(title_x, title_y, title_width, title_height)
+        self.title_label.setStyleSheet("font-size: 24px; font-weight: bold; color: " + Colors.DARK_TEXT_COLOR)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center the text within the label
+        self.title_label.raise_()  # Ensure the label is on top of other widgets
+        self.title_label.show()  # Explicitly show the label
 
     def setup_number_input(self):
         self.number_input = self.create_input(self.box, "Tilføj CVR Nummer", 
