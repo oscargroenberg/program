@@ -36,7 +36,7 @@ class MyApp(QMainWindow):
         self.number_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.number_input.setGeometry(
             int((self.box.width() - InputStyles.WIDTH) / 2),  # Centered horizontally
-            int(self.box.height() - 5 * Sizing.SUBMIT_BUTTON_HEIGHT - 60),  # Adjusted position to be higher up
+            int(self.box.height() - 5 * Sizing.SUBMIT_BUTTON_HEIGHT),  # Adjusted position to be higher up
             InputStyles.WIDTH,
             InputStyles.HEIGHT
         )
@@ -47,14 +47,16 @@ class MyApp(QMainWindow):
         self.number_input.setValidator(number_validator)
 
         # "Tilføj CVR" Button
-        self.add_cvr_btn = QPushButton("Tilføj CVR", self.box)
+        self.add_cvr_btn = QPushButton("+", self.box)  # Using a plus sign emoji
         self.add_cvr_btn.setGeometry(
-            int((self.box.width() - InputStyles.WIDTH) / 2),  # Centered horizontally
-            self.number_input.y() + InputStyles.HEIGHT + 10,  # Positioned below the number input field
-            100,  # Width of the button
-            InputStyles.HEIGHT  # Height of the button (same as the input field for consistency)
+            int((self.box.width() + InputStyles.WIDTH) / 2) + 5,  # Positioned to the right of the input field
+            int(self.number_input.y() + (InputStyles.HEIGHT - 30) / 2),  # Centered vertically relative to the input field
+            30,  # Width of the button
+            30   # Height of the button
         )
-        self.add_cvr_btn.clicked.connect(self.addNumberInputField)        
+        self.add_cvr_btn.setStyleSheet("background-color: green; color: white; border: none; font-size:18px;")  # Green background with white text, no border
+        self.add_cvr_btn.clicked.connect(self.addNumberInputField)
+     
         
         
         # Year Input Field
@@ -142,9 +144,20 @@ class MyApp(QMainWindow):
             sender.showPopup()
 
 
+
     def addNumberInputField(self):
-        # Calculate the position for the new input field
-        new_input_y = self.number_input.y() + Sizing.INPUT_HEIGHT + 10
+        # Store the original position of the "Enter CVR Number" Input Field if not already stored
+        if not hasattr(self, 'original_input_y'):
+            self.original_input_y = self.number_input.y()
+
+        # Shift the original "Enter CVR Number" Input Field upwards
+        self.number_input.move(
+            self.number_input.x(),
+            self.original_input_y - InputStyles.HEIGHT - 10  # Shift upwards by the height of the input field + 10px spacing
+        )
+
+        # Calculate the position for the new input field based on the shifted position of the original input field
+        new_input_y = self.number_input.y() + InputStyles.HEIGHT + 10  # 10px spacing between the two input fields
         new_input = QLineEdit(self.box)
         new_input.setPlaceholderText("Tilføj 2. CVR Nummer")
         new_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -156,39 +169,38 @@ class MyApp(QMainWindow):
         )
         new_input.setStyleSheet(InputStyles.STYLESHEET)
         new_input.show()
-        
+
         # Add the new input to the list of additional inputs
-        if not hasattr(self, 'additional_inputs'):
-            self.additional_inputs = []
         self.additional_inputs.append(new_input)
-        
+
         # Create the red "X" icon next to the new input field
-        self.remove_input_btn = QPushButton("X", self.box)
+        self.remove_input_btn = QPushButton("x", self.box)
         self.remove_input_btn.setGeometry(
             int((self.box.width() + InputStyles.WIDTH) / 2) + 5,  # Just to the right of the input field
-            new_input_y + 10,  # Adjusted for the reduced height
+            new_input_y + 5,  # Adjusted for the reduced height
             20,  # Width of the "X" icon
             30   # Reduced height of the "X" icon
         )
         self.remove_input_btn.setStyleSheet(RemoveInputButtonStyles.STYLESHEET)
-
         self.remove_input_btn.clicked.connect(self.removeNumberInputField)
         self.remove_input_btn.show()
-        
-        # Disable the "Tilføj CVR" button to prevent further additions
-        self.add_cvr_btn.setDisabled(True)
-        # Optionally, hide the button
-        self.add_cvr_btn.hide()
 
+        # Hide the green plus sign button
+        self.add_cvr_btn.hide()
 
     def removeNumberInputField(self):
         # Remove the additional input field
         input_to_remove = self.additional_inputs.pop()
         input_to_remove.deleteLater()
-        
+
         # Remove the red "X" button
         self.remove_input_btn.deleteLater()
-        
-        # Enable and show the "Tilføj CVR" button again
-        self.add_cvr_btn.setDisabled(False)
+
+        # Reset the original "Enter CVR Number" Input Field to its original position
+        self.number_input.move(
+            self.number_input.x(),
+            self.original_input_y
+        )
+
+        # Show the green plus sign button again
         self.add_cvr_btn.show()
