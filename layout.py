@@ -79,12 +79,6 @@ class ClickableComboBox(QComboBox):
         popup.move(popup.x() + offset, popup.y())
 
 
-
-
-
-
-
-
 class MyApp(QMainWindow):
     def __init__(self):
         super().__init__()
