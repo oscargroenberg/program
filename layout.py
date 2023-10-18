@@ -1,11 +1,12 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel
-from PyQt6.QtCore import Qt, QRegularExpression
-from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel, QApplication
+from PyQt6.QtCore import Qt, QRegularExpression, QSize
+from PyQt6.QtGui import QRegularExpressionValidator, QIcon
 import json
-from style import Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles
+from style import Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles, ButtonStyles, Box2AddCVRButtonStyles  # Import ButtonStyles
 from widgets.hover_button import HoverButton
 from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
+
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -16,12 +17,16 @@ class MyApp(QMainWindow):
     def init_ui(self):
         self.setup_window()
         self.setup_box()
-        self.setup_title()  # Ensure the title setup is after the box setup
+        self.setup_box2()
+        self.setup_title()
+        self.setup_box2_title()
+        self.box2_show_number_input()  # This will show the input field directly
         self.setup_number_input()
         self.setup_add_cvr_button()
         self.setup_year_input()
         self.setup_combo_boxes()
         self.setup_submit_button()
+
 
     def setup_window(self):
         self.setWindowTitle("Visma...")
@@ -32,23 +37,116 @@ class MyApp(QMainWindow):
         self.box.setGeometry(25, 25, 300, 550)
         self.box.setStyleSheet(BoxStyles.STYLESHEET)
 
-    def setup_title(self):
-        self.title_label = QLabel("Form", self.box)  # Parented the label to the box
+    def setup_box2(self):  # Renamed method
+        self.box2 = QWidget(self)
+        self.box2.setGeometry(350, 25, 300, 550)
+        self.box2.setStyleSheet(BoxStyles.STYLESHEET)
+
+    def setup_title(self, parent_box=None, title_text="Form"):
+        if parent_box is None:
+            parent_box = self.box
+        self.title_label = QLabel(title_text, parent_box)
         title_width = 200
         title_height = 40
-        title_x = int((self.box.width() - title_width) / 2)
-        title_y = 10  # Top of the box
-        self.title_label.setGeometry(title_x, title_y, title_width, title_height)
-        self.title_label.setStyleSheet("font-size: 24px; font-weight: bold; color: " + Colors.DARK_TEXT_COLOR)
-        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)  # Center the text within the label
-        self.title_label.raise_()  # Ensure the label is on top of other widgets
-        self.title_label.show()  # Explicitly show the label
+        title_x = int((parent_box.width() - title_width) / 2)
+        title_y = 10
+        self.title_label.setGeometry(
+            title_x, title_y, title_width, title_height)
+        self.title_label.setStyleSheet(
+            "font-size: 24px; font-weight: bold; color: " + Colors.DARK_TEXT_COLOR)
+        self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.title_label.raise_()
+        self.title_label.show()
+
+    def setup_box2_title(self):
+        self.setup_title(self.box2, "CVR Numrer")
+        
+
+
+    def box2_show_number_input(self):
+        """Display the CVR input field directly in box2 with the checkmark button to its right and show CVR numbers from cvr.json below."""
+        
+        # Clear previous CVR labels and buttons
+        if hasattr(self, 'cvr_labels_and_buttons'):
+            for label, delete_btn, copy_btn in self.cvr_labels_and_buttons:
+                label.deleteLater()
+                delete_btn.deleteLater()
+                copy_btn.deleteLater()
+            self.cvr_labels_and_buttons.clear()
+        else:
+            self.cvr_labels_and_buttons = []
+
+        # Create the CVR input field
+        self.box2_number_input = self.create_input(self.box2, "Tilføj CVR Nummer", 
+                                                int((self.box2.width() - InputStyles.WIDTH) / 2),
+                                                90)  # Adjusted Y position
+        number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
+        self.box2_number_input.setValidator(number_validator)
+        self.box2_number_input.show()
+
+        # Define button dimensions
+        button_height = int(InputStyles.HEIGHT / 2)
+        button_radius = button_height // 2
+
+        # Calculate the position for the checkmark button to the right of the CVR input field
+        button_x = int(self.box2_number_input.x() + self.box2_number_input.width() + 5)
+        button_y = int(self.box2_number_input.y() + (self.box2_number_input.height() - button_height) / 2)
+
+        # Create the checkmark button for confirming CVR number addition
+        self.box2_checkmark_btn = QPushButton("✔", self.box2)
+        self.box2_checkmark_btn.setGeometry(
+            button_x, button_y,
+            button_height, button_height
+        )
+        self.box2_checkmark_btn.setStyleSheet(f"background-color: green; color: white; border: none; font-size:18px; border-radius: {button_radius}px;")
+        self.box2_checkmark_btn.clicked.connect(self.add_cvr_to_json)
+        self.box2_checkmark_btn.show()
+
+        # Load and display only the CVR numbers from cvr.json below the CVR input field
+        try:
+            with open('cvr.json', 'r') as file:
+                cvr_data = json.load(file)
+                cvr_numbers = [entry["CVR"] for entry in cvr_data]
+                y_offset = self.box2_number_input.y() + self.box2_number_input.height() + 30
+                for cvr in cvr_numbers:
+                    cvr_label = QLabel(cvr, self.box2)
+                    cvr_label.setGeometry(50, y_offset, self.box2.width() - 60, 30)
+                    cvr_label.setStyleSheet("font-size: 20px; color: " + Colors.DARK_TEXT_COLOR)
+                    cvr_label.show()
+
+                    # Adjusted the geometry for the delete and copy buttons
+                    delete_btn_x = self.box2.width() - 100  # Adjust this value as needed
+                    delete_btn = QPushButton("", self.box2)
+                    delete_btn.setIcon(QIcon("images\cross_good.png"))
+                    delete_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
+
+                    delete_btn.setGeometry(delete_btn_x, y_offset, 30, 30)
+                    delete_btn.setStyleSheet("background-color: red; color: white; border: none; font-size:18px; border-radius: 15px;")
+                    delete_btn.clicked.connect(lambda checked, cvr=cvr: self.delete_cvr(cvr))
+                    delete_btn.show()
+
+                    copy_btn_x = delete_btn_x + 35  # 10 pixels gap between the buttons
+                    copy_btn = QPushButton("⎘", self.box2)  # Using the Unicode character for the copy symbol
+                    copy_btn.setGeometry(copy_btn_x, y_offset, 30, 30)  # Adjusted the width and height to make it round
+                    copy_btn.setStyleSheet("background-color: blue; color: white; border: none; font-size:14px; border-radius: 15px;")  # Adjusted border-radius to make it round
+                    copy_btn.clicked.connect(lambda checked, cvr=cvr: self.copy_cvr_to_clipboard(cvr))
+                    copy_btn.show()
+
+                    # Add the CVR label and buttons to the list
+                    self.cvr_labels_and_buttons.append((cvr_label, delete_btn, copy_btn))
+
+                    y_offset += 40
+        except Exception as e:
+            print(f"Error while loading cvr.json: {e}")
+
 
     def setup_number_input(self):
-        self.number_input = self.create_input(self.box, "Tilføj CVR Nummer", 
-                                              int((self.box.width() - InputStyles.WIDTH) / 2),
+        self.number_input = self.create_input(self.box, "CVR Nummer",
+                                              int((self.box.width() -
+                                                  InputStyles.WIDTH) / 2),
                                               int(self.box.height() - 5 * Sizing.SUBMIT_BUTTON_HEIGHT))
-        number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
+        number_validator = QRegularExpressionValidator(
+            QRegularExpression(r"^\d+$"))
         self.number_input.setValidator(number_validator)
 
     def setup_add_cvr_button(self):
@@ -58,14 +156,19 @@ class MyApp(QMainWindow):
             int(self.number_input.y() + (InputStyles.HEIGHT - 30) / 2),
             30, 30
         )
-        self.add_cvr_btn.setStyleSheet("background-color: green; color: white; border: none; font-size:18px;")
+        self.add_cvr_btn.setStyleSheet(
+            "background-color: green; color: white; border: none; font-size:18px; border-radius: 15px;"
+        )
+
         self.add_cvr_btn.clicked.connect(self.addNumberInputField)
 
     def setup_year_input(self):
-        self.year_input = self.create_input(self.box, "Enter Year", 
-                                            int((self.box.width() - InputStyles.WIDTH) / 2),
+        self.year_input = self.create_input(self.box, "År",
+                                            int((self.box.width() -
+                                                InputStyles.WIDTH) / 2),
                                             int(self.box.height() - 3 * Sizing.SUBMIT_BUTTON_HEIGHT - 40))
-        year_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{4}$"))
+        year_validator = QRegularExpressionValidator(
+            QRegularExpression(r"^\d{4}$"))
         self.year_input.setValidator(year_validator)
 
     def setup_combo_boxes(self):
@@ -132,29 +235,99 @@ class MyApp(QMainWindow):
 
     def addNumberInputField(self):
         self.original_input_y = self.number_input.y()
-        self.number_input.move(self.number_input.x(), 
-                               self.original_input_y - InputStyles.HEIGHT - 10)
+        self.number_input.move(self.number_input.x(),
+                            self.original_input_y - InputStyles.HEIGHT - 10)
         new_input_y = self.number_input.y() + InputStyles.HEIGHT + 10
-        new_input = self.create_input(self.box, "Tilføj 2. CVR Nummer", 
-                                      int((self.box.width() - InputStyles.WIDTH) / 2), new_input_y)
+        new_input = self.create_input(self.box, "2. CVR",
+                                    int((self.box.width() - InputStyles.WIDTH) / 2), new_input_y)
         new_input.show()
         self.additional_inputs.append(new_input)
 
-        self.remove_input_btn = QPushButton("x", self.box)
+        # Delete the old remove_input_btn if it exists
+        if hasattr(self, 'remove_input_btn') and self.remove_input_btn:
+            self.remove_input_btn.deleteLater()
+
+        # Create the new styled remove_input_btn to match the "x" button in box2
+        self.remove_input_btn = QPushButton("", self.box)
+        self.remove_input_btn.setIcon(QIcon("images\cross_good.png"))
+        self.remove_input_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
+
         self.remove_input_btn.setGeometry(
             int((self.box.width() + InputStyles.WIDTH) / 2) + 5,
-            new_input_y + 5,
-            20, 30
+            new_input_y + 10,
+            30, 30  # Adjusted width and height to make it square
         )
-        self.remove_input_btn.setStyleSheet(RemoveInputButtonStyles.STYLESHEET)
+        self.remove_input_btn.setStyleSheet("background-color: red; color: white; border: none; font-size:18px; border-radius: 15px;")  # Styling to match the "x" button in box2
         self.remove_input_btn.clicked.connect(self.removeNumberInputField)
         self.remove_input_btn.show()
 
         self.add_cvr_btn.hide()
 
     def removeNumberInputField(self):
-        input_to_remove = self.additional_inputs.pop()
-        input_to_remove.deleteLater()
-        self.remove_input_btn.deleteLater()
-        self.number_input.move(self.number_input.x(), self.original_input_y)
-        self.add_cvr_btn.show()
+        if self.additional_inputs:  # Check if the list is not empty
+            input_to_remove = self.additional_inputs.pop()
+            input_to_remove.deleteLater()
+            self.number_input.move(self.number_input.x(), self.original_input_y)
+            self.add_cvr_btn.show()
+
+            # Delete the remove_input_btn
+            if hasattr(self, 'remove_input_btn') and self.remove_input_btn:
+                self.remove_input_btn.deleteLater()
+                del self.remove_input_btn  # Explicitly delete the reference
+
+
+
+    def add_cvr_to_json(self):
+        """Add the CVR from the input field to cvr.json and refresh the display."""
+        if hasattr(self, 'box2_number_input'):
+            cvr_number = self.box2_number_input.text()
+            if cvr_number:
+                try:
+                    with open('cvr.json', 'r+') as file:
+                        try:
+                            data = json.load(file)
+                        except json.JSONDecodeError:
+                            data = []
+                        data.append({"CVR": cvr_number})
+                        file.seek(0)
+                        json.dump(data, file, indent=4)
+                        file.truncate()
+                    self.box2_show_number_input()  # Refresh the display
+                except Exception as e:
+                    print(f"Error while processing the JSON file: {e}")
+        else:
+            print("Error: CVR input field not found.")
+
+    def remove_cvr_input(self):
+        # Check if the object exists before trying to delete
+        if hasattr(self, 'box2_number_input'):
+            self.box2_number_input.deleteLater()
+            del self.box2_number_input  # Explicitly delete the reference
+
+        if hasattr(self, 'box2_checkmark_btn'):
+            self.box2_checkmark_btn.deleteLater()
+            del self.box2_checkmark_btn
+
+        if hasattr(self, 'box2_x_btn'):
+            self.box2_x_btn.deleteLater()
+            del self.box2_x_btn
+
+
+
+    def delete_cvr(self, cvr):
+        """Delete the specified CVR from cvr.json and refresh the display."""
+        try:
+            with open('cvr.json', 'r+') as file:
+                data = json.load(file)
+                data = [entry for entry in data if entry["CVR"] != cvr]
+                file.seek(0)
+                json.dump(data, file, indent=4)
+                file.truncate()
+            self.box2_show_number_input()  # Refresh the display
+        except Exception as e:
+            print(f"Error while processing the JSON file: {e}")
+            
+    def copy_cvr_to_clipboard(self, cvr):
+        """Copy the specified CVR to the clipboard."""
+        clipboard = QApplication.clipboard()
+        clipboard.setText(cvr)

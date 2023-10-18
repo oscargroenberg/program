@@ -125,3 +125,20 @@ class RemoveInputButtonStyles:
         font-weight: bold; 
         border: none;
     """
+
+
+
+class Box2AddCVRButtonStyles:
+    STYLESHEET = """
+        QPushButton {
+            background-color: #4CAF50;  # Green background
+            color: #FFFFFF;  # White text
+            border-radius: 15px;  # Rounded corners
+            font-size: 16px;  # Font size
+        }
+        QPushButton:hover {
+            color: #E0E0E0;  # Lighter text color on hover
+        }
+    """
+
+
