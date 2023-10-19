@@ -17,7 +17,7 @@ class Colors:
 
 # Sizing
 class Sizing:
-    WINDOW_WIDTH = 1000
+    WINDOW_WIDTH = 675
     WINDOW_HEIGHT = 600
     
     INPUT_WIDTH = 215
