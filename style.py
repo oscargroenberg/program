@@ -143,3 +143,55 @@ class Box2AddCVRButtonStyles:
     """
 
 
+
+
+class PlusButtonStyles:
+    STYLESHEET = """
+        background-color: green; 
+        color: white; 
+        border: none; 
+        font-size: 24px; 
+        border-radius: 15px;
+        padding: 0px 0px 5px 0px; 
+        margin: 0px; 
+        text-align: center; 
+        qproperty-iconSize: 24px 24px;
+    """
+
+class CVRInputStyles:
+    STYLESHEET = InputStyles.STYLESHEET
+
+class DeleteButtonStyles:
+    STYLESHEET = """
+        background-color: red; 
+        color: white; 
+        border: none; 
+        font-size:18px; 
+        border-radius: 15px;
+    """
+
+class CopyButtonStyles:
+    STYLESHEET = """
+        background-color: blue; 
+        color: white; 
+        border: none; 
+        font-size:14px; 
+        border-radius: 15px;
+    """
+    
+    
+    
+    
+class SecondPlusButtonStyles:
+    BORDER_RADIUS = int(InputStyles.HEIGHT / 4)
+    STYLESHEET = """
+        background-color: green; 
+        color: white; 
+        border: none; 
+        font-size: 24px; 
+        border-radius: {border_radius}px;  
+        padding: 0px 0px 5px 0px; 
+        margin: 0px; 
+        text-align: center; 
+        qproperty-iconSize: 24px 24px;
+    """.format(border_radius=BORDER_RADIUS)

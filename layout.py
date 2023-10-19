@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QCombo
 from PyQt6.QtCore import Qt, QRegularExpression, QSize
 from PyQt6.QtGui import QRegularExpressionValidator, QIcon
 import json
-from style import Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles, ButtonStyles, Box2AddCVRButtonStyles  # Import ButtonStyles
+from style import Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles, ButtonStyles, Box2AddCVRButtonStyles, PlusButtonStyles, DeleteButtonStyles, CopyButtonStyles, SecondPlusButtonStyles
 from widgets.hover_button import HoverButton
 from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
@@ -65,7 +65,7 @@ class MyApp(QMainWindow):
 
 
     def box2_show_number_input(self):
-        """Display the CVR input field directly in box2 with the checkmark button to its right and show CVR numbers from cvr.json below."""
+        """Display the CVR input field directly in box2 with the plus button to its right and show CVR numbers from cvr.json below."""
         
         # Clear previous CVR labels and buttons
         if hasattr(self, 'cvr_labels_and_buttons'):
@@ -79,29 +79,28 @@ class MyApp(QMainWindow):
 
         # Create the CVR input field
         self.box2_number_input = self.create_input(self.box2, "Tilføj CVR Nummer", 
-                                                int((self.box2.width() - InputStyles.WIDTH) / 2),
-                                                90)  # Adjusted Y position
+                                                    int((self.box2.width() - InputStyles.WIDTH) / 2),
+                                                    90)  # Adjusted Y position
         number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
         self.box2_number_input.setValidator(number_validator)
         self.box2_number_input.show()
 
         # Define button dimensions
-        button_height = int(InputStyles.HEIGHT / 2)
-        button_radius = button_height // 2
+        button_size = int(InputStyles.HEIGHT / 2)  # Make it a square
 
-        # Calculate the position for the checkmark button to the right of the CVR input field
+        # Calculate the position for the plus button to the right of the CVR input field
         button_x = int(self.box2_number_input.x() + self.box2_number_input.width() + 5)
-        button_y = int(self.box2_number_input.y() + (self.box2_number_input.height() - button_height) / 2)
+        button_y = int(self.box2_number_input.y() + (self.box2_number_input.height() - button_size) / 2)
 
-        # Create the checkmark button for confirming CVR number addition
-        self.box2_checkmark_btn = QPushButton("✔", self.box2)
-        self.box2_checkmark_btn.setGeometry(
-            button_x, button_y,
-            button_height, button_height
-        )
-        self.box2_checkmark_btn.setStyleSheet(f"background-color: green; color: white; border: none; font-size:18px; border-radius: {button_radius}px;")
-        self.box2_checkmark_btn.clicked.connect(self.add_cvr_to_json)
-        self.box2_checkmark_btn.show()
+        # Create the plus button for confirming CVR number addition
+        self.box2_plus_btn = QPushButton("+", self.box2)
+        self.box2_plus_btn.setGeometry(button_x, button_y, button_size, button_size)
+        self.box2_plus_btn.setStyleSheet(SecondPlusButtonStyles.STYLESHEET)
+        self.box2_plus_btn.clicked.connect(self.add_cvr_to_json)
+        self.box2_plus_btn.show()
+
+
+
 
         # Load and display only the CVR numbers from cvr.json below the CVR input field
         try:
@@ -122,14 +121,14 @@ class MyApp(QMainWindow):
                     delete_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
 
                     delete_btn.setGeometry(delete_btn_x, y_offset, 30, 30)
-                    delete_btn.setStyleSheet("background-color: red; color: white; border: none; font-size:18px; border-radius: 15px;")
+                    delete_btn.setStyleSheet(DeleteButtonStyles.STYLESHEET)
                     delete_btn.clicked.connect(lambda checked, cvr=cvr: self.delete_cvr(cvr))
                     delete_btn.show()
 
                     copy_btn_x = delete_btn_x + 35  # 10 pixels gap between the buttons
                     copy_btn = QPushButton("⎘", self.box2)  # Using the Unicode character for the copy symbol
                     copy_btn.setGeometry(copy_btn_x, y_offset, 30, 30)  # Adjusted the width and height to make it round
-                    copy_btn.setStyleSheet("background-color: blue; color: white; border: none; font-size:14px; border-radius: 15px;")  # Adjusted border-radius to make it round
+                    copy_btn.setStyleSheet(CopyButtonStyles.STYLESHEET)  # Adjusted border-radius to make it round
                     copy_btn.clicked.connect(lambda checked, cvr=cvr: self.copy_cvr_to_clipboard(cvr))
                     copy_btn.show()
 
@@ -157,11 +156,11 @@ class MyApp(QMainWindow):
             int(self.number_input.y() + (InputStyles.HEIGHT - 30) / 2),
             30, 30
         )
-        self.add_cvr_btn.setStyleSheet(
-            "background-color: green; color: white; border: none; font-size:18px; border-radius: 15px;"
-        )
+        self.add_cvr_btn.setStyleSheet(PlusButtonStyles.STYLESHEET)
+
 
         self.add_cvr_btn.clicked.connect(self.addNumberInputField)
+
 
     def setup_year_input(self):
         self.year_input = self.create_input(self.box, "År",
