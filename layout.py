@@ -105,7 +105,7 @@ class MyApp(QMainWindow):
 
         # Load and display only the CVR numbers from cvr.json below the CVR input field
         try:
-            with open('cvr.json', 'r') as file:
+            with open('json_files\cvr.json', 'r') as file:
                 cvr_data = json.load(file)
                 cvr_numbers = [entry["CVR"] for entry in cvr_data]
                 y_offset = self.box2_number_input.y() + self.box2_number_input.height() + 30
@@ -222,7 +222,7 @@ class MyApp(QMainWindow):
         return input_field
 
     def load_combo_box_data(self):
-        with open('C:/Users/oscar/Desktop/visma/months.json', 'r') as file:
+        with open('json_files\months.json', 'r') as file:
             months_data = json.load(file)
         for month in months_data:
             self.combo1.addItem(month["Month"], month["ID"])
@@ -284,7 +284,7 @@ class MyApp(QMainWindow):
             cvr_number = self.box2_number_input.text()
             if cvr_number:
                 try:
-                    with open('cvr.json', 'r+') as file:
+                    with open('json_files\cvr.json', 'r+') as file:
                         try:
                             data = json.load(file)
                         except json.JSONDecodeError:
@@ -318,7 +318,7 @@ class MyApp(QMainWindow):
     def delete_cvr(self, cvr):
         """Delete the specified CVR from cvr.json and refresh the display."""
         try:
-            with open('cvr.json', 'r+') as file:
+            with open('json_files\cvr.json', 'r+') as file:
                 data = json.load(file)
                 data = [entry for entry in data if entry["CVR"] != cvr]
                 file.seek(0)
