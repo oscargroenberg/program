@@ -1,3 +1,4 @@
+#layout.py
 from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel, QApplication
 from PyQt6.QtCore import Qt, QRegularExpression, QSize
 from PyQt6.QtGui import QRegularExpressionValidator, QIcon

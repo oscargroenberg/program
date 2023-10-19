@@ -1,3 +1,4 @@
+#hover_button.py
 from PyQt6.QtWidgets import QPushButton
 from PyQt6.QtCore import Qt, QPropertyAnimation
 from PyQt6.QtGui import QColor

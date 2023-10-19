@@ -1,3 +1,4 @@
+#clickable_combo_box.py
 from PyQt6.QtWidgets import QComboBox, QLineEdit
 from PyQt6.QtCore import Qt
 from style import ComboBoxStyles

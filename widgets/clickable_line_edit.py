@@ -1,3 +1,4 @@
+#clickable_line_edit.py
 from PyQt6.QtWidgets import QLineEdit
 from PyQt6.QtCore import pyqtSignal
 

@@ -1,3 +1,4 @@
+#style.py
 # Colors
 class Colors:
     ACTION_COLOR = "#f01245"

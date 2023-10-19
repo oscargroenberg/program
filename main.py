@@ -1,3 +1,4 @@
+#main.py
 from PyQt6.QtWidgets import QApplication
 import sys
 from layout import MyApp
