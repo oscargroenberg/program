@@ -1,19 +1,22 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel, QApplication
-from PyQt6.QtCore import Qt, QRegularExpression, QSize
+from PyQt6.QtWidgets import QMainWindow, QWidget, QPushButton, QLineEdit, QComboBox, QLabel, QApplication, QMessageBox
+from PyQt6.QtCore import Qt, QRegularExpression, QSize, QEvent
 from PyQt6.QtGui import QRegularExpressionValidator, QIcon
 import json
-from style import (Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles, ButtonStyles,
-                   Box2AddCVRButtonStyles, PlusButtonStyles, DeleteButtonStyles, CopyButtonStyles, SecondPlusButtonStyles)
+from style import (Colors, Sizing, ComboBoxStyles, InputStyles, BoxStyles, RemoveInputButtonStyles, ButtonStyles, PlusButtonStyles, InputFieldStyles, DeleteButtonStyles)
 from widgets.hover_button import HoverButton
 from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
+from functools import partial
 
 
 class MyApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.additional_inputs = []
+        self.input_fields_count = 0 
         self.init_ui()
+        self.input_fields = []  # List to store all input fields
+        self.load_data_and_populate_fields()
 
     def init_ui(self):
         self.setup_window()
@@ -25,6 +28,8 @@ class MyApp(QMainWindow):
         self.setup_year_input()
         self.setup_combo_boxes()
         self.setup_submit_button()
+        self.setup_add_item_button()
+        self.delete_buttons = []
 
     # Window Setup
     def setup_window(self):
@@ -112,7 +117,7 @@ class MyApp(QMainWindow):
     
     
     
-    
+    #Setup for Combo Boxes
     
     def setup_box2_title(self):
         self.setup_title(self.box2, "CVR Numrer")
@@ -220,55 +225,114 @@ class MyApp(QMainWindow):
                 self.remove_input_btn.deleteLater()
                 del self.remove_input_btn  # Explicitly delete the reference
 
-    def add_cvr_to_json(self):
-        """Add the CVR from the input field to cvr.json and refresh the display."""
-        if hasattr(self, 'box2_number_input'):
-            cvr_number = self.box2_number_input.text()
-            if cvr_number:
-                try:
-                    with open('json_files\cvr.json', 'r+') as file:
-                        try:
-                            data = json.load(file)
-                        except json.JSONDecodeError:
-                            data = []
-                        data.append({"CVR": cvr_number})
-                        file.seek(0)
-                        json.dump(data, file, indent=4)
-                        file.truncate()
-                    self.box2_show_number_input()  # Refresh the display
-                except Exception as e:
-                    print(f"Error while processing the JSON file: {e}")
-        else:
-            print("Error: CVR input field not found.")
+    def mousePressEvent(self, event):
+        focused_widget = QApplication.instance().focusWidget()
+        if isinstance(focused_widget, (QLineEdit, QComboBox)):
+            focused_widget.clearFocus()
+        super().mousePressEvent(event)
+        
+        
+        
+    def setup_add_item_button(self):
+        self.add_item_btn = QPushButton("Tilføj CVR", self.box2)
+        self.add_item_btn.setGeometry(
+            int((self.box2.width() - Sizing.SUBMIT_BUTTON_WIDTH) / 2),
+            int(self.box2.height() - Sizing.SUBMIT_BUTTON_HEIGHT - 20),
+            Sizing.SUBMIT_BUTTON_WIDTH,
+            Sizing.SUBMIT_BUTTON_HEIGHT
+        )
+        self.add_item_btn.setStyleSheet(ButtonStyles.STYLESHEET)
+        self.add_item_btn.clicked.connect(self.add_new_input_field)
 
-    def remove_cvr_input(self):
-        # Check if the object exists before trying to delete
-        if hasattr(self, 'box2_number_input'):
-            self.box2_number_input.deleteLater()
-            del self.box2_number_input  # Explicitly delete the reference
+        
 
-        if hasattr(self, 'box2_checkmark_btn'):
-            self.box2_checkmark_btn.deleteLater()
-            del self.box2_checkmark_btn
 
-        if hasattr(self, 'box2_x_btn'):
-            self.box2_x_btn.deleteLater()
-            del self.box2_x_btn
-
-    def delete_cvr(self, cvr):
-        """Delete the specified CVR from cvr.json and refresh the display."""
+    def load_data_and_populate_fields(self):
         try:
-            with open('json_files\cvr.json', 'r+') as file:
+            with open('json_files/cvr.json', 'r') as file:
                 data = json.load(file)
-                data = [entry for entry in data if entry["CVR"] != cvr]
-                file.seek(0)
-                json.dump(data, file, indent=4)
-                file.truncate()
-            self.box2_show_number_input()  # Refresh the display
-        except Exception as e:
-            print(f"Error while processing the JSON file: {e}")
+            
+            for item in data:
+                self.add_new_input_field(item["data"])
+        except FileNotFoundError:
+            pass  # Handle the case where the file doesn't exist yet
 
-    def copy_cvr_to_clipboard(self, cvr):
-        """Copy the specified CVR to the clipboard."""
-        clipboard = QApplication.clipboard()
-        clipboard.setText(cvr)
+    def add_new_input_field(self, text=None):
+        if self.input_fields_count < 10:  # Limit to 10 input fields
+            y_coordinate = 50 + self.input_fields_count * (Sizing.INPUT_HEIGHT - 10)
+            new_input = QLineEdit(self.box2)
+            new_input.setGeometry(
+                int((self.box2.width() - Sizing.INPUT_WIDTH) / 2),
+                y_coordinate,
+                Sizing.INPUT_WIDTH,
+                Sizing.INPUT_HEIGHT
+            )
+            new_input.setStyleSheet(InputFieldStyles.STYLESHEET)
+            
+            # Set the validator to ensure 8 digits
+            eight_digit_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{8}$"))
+            new_input.setValidator(eight_digit_validator)
+            
+            new_input.editingFinished.connect(self.save_to_json)
+            if text:  # If text is provided, set it
+                new_input.setText(text)
+            new_input.show()
+            self.input_fields.append(new_input)  # Add the new input to the list
+
+            # Create delete button
+            delete_button = QPushButton("X", self.box2)
+            delete_button.setGeometry(
+                new_input.x() + new_input.width() + 5,
+                y_coordinate,
+                30,  # Width of the delete button
+                Sizing.INPUT_HEIGHT
+            )
+            delete_button.setStyleSheet(DeleteButtonStyles.STYLESHEET)
+            delete_button.clicked.connect(partial(self.delete_input_field, new_input, delete_button))
+            delete_button.show()
+
+            # Add the delete button to the list
+            self.delete_buttons.append(delete_button)
+
+            self.input_fields_count += 1
+
+    def delete_input_field(self, input_field, delete_button):
+        # Get the index of the input field before removing it
+        index = self.input_fields.index(input_field)
+
+        # Remove the input field and its delete button
+        self.input_fields.remove(input_field)
+        self.delete_buttons.remove(delete_button)  # Remove the delete button from the list
+        input_field.deleteLater()
+        delete_button.deleteLater()
+
+        # Adjust positions of the remaining input fields and their delete buttons
+        for i in range(index, len(self.input_fields)):
+            current_input = self.input_fields[i]
+            current_input.move(current_input.x(), current_input.y() - (Sizing.INPUT_HEIGHT - 10))
+            # Adjust the position and set a fixed height for the delete button as well
+            current_delete_button = self.delete_buttons[i]
+            current_delete_button.setGeometry(
+                current_input.x() + current_input.width() + 5,
+                current_input.y(),
+                30,  # Width of the delete button
+                30   # Fixed height of 30px
+            )
+
+        self.input_fields_count -= 1
+
+        # Save the data to the JSON file
+        self.save_to_json()
+        
+        # Repaint the widget to ensure the changes are immediately visible
+        self.repaint()
+
+
+
+
+
+
+    def save_to_json(self):
+        data = [{"data": input_field.text()} for input_field in self.input_fields]
+        with open('json_files/cvr.json', 'w') as file:
+            json.dump(data, file)

@@ -158,17 +158,20 @@ class PlusButtonStyles:
         qproperty-iconSize: 24px 24px;
     """
 
-class CVRInputStyles:
-    STYLESHEET = InputStyles.STYLESHEET
-
 class DeleteButtonStyles:
     STYLESHEET = """
         background-color: red; 
         color: white; 
         border: none; 
-        font-size:18px; 
-        border-radius: 15px;
+        font-size: 18px; 
+        border-radius: 15px;  /* Make it circular */
+        width: 30px;  /* Set a fixed width */
+        height: 30px; /* Set a fixed height */
+        text-align: center; /* Center the text */
     """
+
+
+
 
 class CopyButtonStyles:
     STYLESHEET = """
@@ -180,18 +183,22 @@ class CopyButtonStyles:
     """
     
     
-    
-    
-class SecondPlusButtonStyles:
-    BORDER_RADIUS = int(InputStyles.HEIGHT / 4)
+
+# Input Field Styles
+class InputFieldStyles:
     STYLESHEET = """
-        background-color: green; 
-        color: white; 
-        border: none; 
-        font-size: 24px; 
-        border-radius: {border_radius}px;  
-        padding: 0px 0px 5px 0px; 
-        margin: 0px; 
-        text-align: center; 
-        qproperty-iconSize: 24px 24px;
-    """.format(border_radius=BORDER_RADIUS)
+        QLineEdit {
+            background-color: transparent;
+            border: none;
+            border-bottom: 1px solid black;
+            border-radius: 0;
+            font-size: 16px;
+            padding: 0 0 -20px 0;
+        }
+    """
+
+
+
+
+
+

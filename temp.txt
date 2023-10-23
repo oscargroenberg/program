@@ -1,82 +1,32 @@
-def box2_show_number_input(self):
-        """Display the CVR input field directly in box2 with the plus button to its right and show CVR numbers from cvr.json below."""
-        
-        # Clear previous CVR labels and buttons
-        if hasattr(self, 'cvr_labels_and_buttons'):
-            for label, delete_btn, copy_btn in self.cvr_labels_and_buttons:
-                label.deleteLater()
-                delete_btn.deleteLater()
-                copy_btn.deleteLater()
-            self.cvr_labels_and_buttons.clear()
-        else:
-            self.cvr_labels_and_buttons = []
-
-        # Create the CVR input field
-        self.box2_number_input = self.create_input(self.box2, "Tilføj CVR Nummer", 
-                                                    int((self.box2.width() - InputStyles.WIDTH) / 2),
-                                                    90)  # Adjusted Y position
-        number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
-        self.box2_number_input.setValidator(number_validator)
-        self.box2_number_input.show()
-
-        # Define button dimensions
-        button_size = int(InputStyles.HEIGHT / 2.5)  # Make it a square, slightly smaller than half the height of the input field
-
-        # Calculate the position for the plus button to the right of the CVR input field
-        button_x = int(self.box2_number_input.x() + self.box2_number_input.width() + 5)
-        button_y = int(self.box2_number_input.y() + (self.box2_number_input.height() - button_size) / 2)
-
-        # Create the plus button for confirming CVR number addition
-        self.box2_plus_btn = QPushButton("+", self.box2)
-        self.box2_plus_btn.setGeometry(button_x, button_y, button_size, button_size)
-        rounded_stylesheet = PlusButtonStyles.STYLESHEET.replace("border-radius: 25px;", f"border-radius: {button_size}px;")
-        self.box2_plus_btn.setStyleSheet(rounded_stylesheet)
-        self.box2_plus_btn.clicked.connect(self.add_cvr_to_json)
-        self.box2_plus_btn.show()
-
-
-        # Load and display only the CVR numbers from cvr.json below the CVR input field
-        try:
-            with open('json_files\cvr.json', 'r') as file:
-                cvr_data = json.load(file)
-                cvr_numbers = [entry["CVR"] for entry in cvr_data]
-                y_offset = self.box2_number_input.y() + self.box2_number_input.height() + 30
-                for cvr in cvr_numbers:
-                    cvr_label = QLabel(cvr, self.box2)
-                    cvr_label.setGeometry(50, y_offset, self.box2.width() - 60, 30)
-                    cvr_label.setStyleSheet("font-size: 20px; color: " + Colors.DARK_TEXT_COLOR)
-                    cvr_label.show()
-
-                    # Adjusted the geometry for the delete and copy buttons
-                    delete_btn_x = self.box2.width() - 100  # Adjust this value as needed
-                    delete_btn = QPushButton("", self.box2)
-                    delete_btn.setIcon(QIcon("images\cross_good.png"))
-                    delete_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
-
-                    delete_btn.setGeometry(delete_btn_x, y_offset, 30, 30)
-                    delete_btn.setStyleSheet(DeleteButtonStyles.STYLESHEET)
-                    delete_btn.clicked.connect(lambda checked, cvr=cvr: self.delete_cvr(cvr))
-                    delete_btn.show()
-
-                    copy_btn_x = delete_btn_x + 35  # 10 pixels gap between the buttons
-                    copy_btn = QPushButton("⎘", self.box2)  # Using the Unicode character for the copy symbol
-                    copy_btn.setGeometry(copy_btn_x, y_offset, 30, 30)  # Adjusted the width and height to make it round
-                    copy_btn.setStyleSheet(CopyButtonStyles.STYLESHEET)  # Adjusted border-radius to make it round
-                    copy_btn.clicked.connect(lambda checked, cvr=cvr: self.copy_cvr_to_clipboard(cvr))
-                    copy_btn.show()
-
-                    # Add the CVR label and buttons to the list
-                    self.cvr_labels_and_buttons.append((cvr_label, delete_btn, copy_btn))
-
-                    y_offset += 40
-        except Exception as e:
-            print(f"Error while loading cvr.json: {e}")
-
-
-
-
-
-
-
-
-
+[
+    {
+        "CVR": "12345678"
+    },
+    {
+        "CVR": "87654321"
+    },
+    {
+        "CVR": "11112222"
+    },
+    {
+        "CVR": "99998888"
+    },
+    {
+        "CVR": "55554444"
+    },
+    {
+        "CVR": "77777777"
+    },
+    {
+        "CVR": "88888888"
+    },
+    {
+        "CVR": "55555555"
+    },
+    {
+        "CVR": "66666666"
+    },
+    {
+        "CVR": "44444444"
+    }
+]
