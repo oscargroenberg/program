@@ -43,7 +43,7 @@ class MyApp(QMainWindow):
     # Box Setups
     def setup_boxes(self):
         self.box = self.setup_box(25, 25, 300, 370)
-        self.box2 = self.setup_box(350, 25, 400, 550)
+        self.box2 = self.setup_box(350, 25, 300, 550)
 
     def setup_box(self, x, y, width, height):
         box = QWidget(self)
@@ -292,7 +292,7 @@ class MyApp(QMainWindow):
         
         
     def setup_add_item_button(self):
-        self.add_item_btn = QPushButton("Tilføj CVR", self.box2)
+        self.add_item_btn = HoverButton("Tilføj CVR", self.box2)
         self.add_item_btn.setGeometry(
             int((self.box2.width() - Sizing.SUBMIT_BUTTON_WIDTH) / 2),
             int(self.box2.height() - Sizing.SUBMIT_BUTTON_HEIGHT - 20),
@@ -318,11 +318,13 @@ class MyApp(QMainWindow):
     def add_new_input_field(self, text=None):
         if self.input_fields_count < 10:  # Limit to 10 input fields
             y_coordinate = 50 + self.input_fields_count * (Sizing.INPUT_HEIGHT - 10) + 5  # Adjusted by adding 5 pixels
+            x_coordinate = int((self.box2.width() - Sizing.INPUT_WIDTH + 140) / 2) + 70  # Adjusted x-coordinate with +20
+            
             new_input = QLineEdit(self.box2)
             new_input.setGeometry(
-                int((self.box2.width() - Sizing.INPUT_WIDTH) / 2),
+                x_coordinate,
                 y_coordinate,
-                Sizing.INPUT_WIDTH,
+                Sizing.INPUT_WIDTH - 140,  # Adjusted width
                 Sizing.INPUT_HEIGHT
             )
             new_input.setStyleSheet(InputFieldStyles.STYLESHEET)
@@ -340,7 +342,7 @@ class MyApp(QMainWindow):
             # Create delete button
             delete_button = QPushButton("X", self.box2)
             delete_button.setGeometry(
-                new_input.x() + new_input.width() + 5,
+                x_coordinate + new_input.width() + 5,  # Adjusted x-coordinate
                 y_coordinate + 20,
                 30,  # Width of the delete button
                 30   # Height of the delete button (make it equal to width for a square shape)
@@ -355,6 +357,7 @@ class MyApp(QMainWindow):
 
             self.input_fields_count += 1
 
+    
 
     def delete_input_field(self, input_field, delete_button):
         # Get the index of the input field before removing it
