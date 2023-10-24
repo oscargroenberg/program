@@ -16,7 +16,7 @@ class ClickableComboBox(QComboBox):
         
         # Adjust the viewport margins to remove the space around the list items
         listView = self.view()
-        listView.setViewportMargins(0, 0, 0, 0)  # Set all margins to 0
+        listView.setStyleSheet("QListView { padding: 0px; margin: 0px; }")
 
     def showPopup(self):
         popup = self.view().parentWidget()  # This gets the viewport's parent, which is the actual dropdown popup

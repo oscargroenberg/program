@@ -7,7 +7,7 @@ from widgets.hover_button import HoverButton
 from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
 from functools import partial
-
+import os
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -171,7 +171,7 @@ class MyApp(QMainWindow):
         return input_field
 
     def load_combo_box_data(self):
-        with open('json_files\months.json', 'r') as file:
+        with open(os.path.join('json_files', 'months.json'), 'r') as file:
             months_data = json.load(file)
         for month in months_data:
             self.combo1.addItem(month["Month"], month["ID"])
@@ -199,7 +199,9 @@ class MyApp(QMainWindow):
 
         # Create the new styled remove_input_btn to match the "x" button in box2
         self.remove_input_btn = QPushButton("", self.box)
-        self.remove_input_btn.setIcon(QIcon("images\cross_good.png"))
+        icon_path = os.path.join("images", "cross_good.png")
+        self.remove_input_btn.setIcon(QIcon(icon_path))
+        
         self.remove_input_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
 
         self.remove_input_btn.setGeometry(
@@ -212,6 +214,7 @@ class MyApp(QMainWindow):
         self.remove_input_btn.show()
 
         self.add_cvr_btn.hide()
+
 
     def removeNumberInputField(self):
         if self.additional_inputs:  # Check if the list is not empty
@@ -244,12 +247,12 @@ class MyApp(QMainWindow):
         self.add_item_btn.setStyleSheet(ButtonStyles.STYLESHEET)
         self.add_item_btn.clicked.connect(self.add_new_input_field)
 
-        
 
 
     def load_data_and_populate_fields(self):
         try:
-            with open('json_files/cvr.json', 'r') as file:
+            filepath = os.path.join('json_files', 'cvr.json')
+            with open(filepath, 'r') as file:
                 data = json.load(file)
             
             for item in data:
@@ -334,5 +337,6 @@ class MyApp(QMainWindow):
 
     def save_to_json(self):
         data = [{"data": input_field.text()} for input_field in self.input_fields]
-        with open('json_files/cvr.json', 'w') as file:
+        filepath = os.path.join('json_files', 'cvr.json')
+        with open(filepath, 'w') as file:
             json.dump(data, file)
