@@ -7,6 +7,7 @@ from widgets.hover_button import HoverButton
 from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
 from functools import partial
+from web import web_scrap
 
 
 class MyApp(QMainWindow):
@@ -29,6 +30,7 @@ class MyApp(QMainWindow):
         self.setup_combo_boxes()
         self.setup_submit_button()
         self.setup_add_item_button()
+        self.setup_nemid_input()
         self.delete_buttons = []
 
     # Window Setup
@@ -71,8 +73,10 @@ class MyApp(QMainWindow):
 
     # Input Setups
     def setup_inputs(self):
+        self.setup_nemid_input()
         self.setup_number_input()
         self.setup_year_input()
+        
 
     def setup_number_input(self):
         self.number_input = self.create_input(self.box, "CVR Nummer",
@@ -87,6 +91,12 @@ class MyApp(QMainWindow):
                                             int(self.box.height() - 3 * Sizing.SUBMIT_BUTTON_HEIGHT - 40))
         year_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{4}$"))
         self.year_input.setValidator(year_validator)
+    
+    def setup_nemid_input(self):
+        self.nemid_input = self.create_input(self.box, "Nem-id",
+                                             int((self.box.width() - InputStyles.WIDTH) / 2),
+                                             int(self.box.height() - 7 * Sizing.SUBMIT_BUTTON_HEIGHT))
+        return self.nemid_input.text()
 
     # Button Setups
     def setup_buttons(self):
@@ -111,7 +121,11 @@ class MyApp(QMainWindow):
             Sizing.SUBMIT_BUTTON_WIDTH,
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
-        self.submit_btn.clicked.connect(self.printYearAndMonths)
+        self.submit_btn.clicked.connect(self.on_submit_button_clicked)
+
+    def on_submit_button_clicked(self):
+        nemid_value = self.nemid_input.text()  # Get the current text from the input
+        web_scrap(nemid_value)
         
     
     
