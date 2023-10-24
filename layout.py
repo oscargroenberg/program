@@ -17,19 +17,23 @@ class MyApp(QMainWindow):
         self.init_ui()
         self.input_fields = []  # List to store all input fields
         self.load_data_and_populate_fields()
+        self.original_box_height = self.box.height()
+
 
     def init_ui(self):
         self.setup_window()
         self.setup_boxes()
         self.setup_title()
         self.setup_box2_title()
-        self.setup_number_input()
+        self.setup_new_text_input()  # This should be called first
+        self.setup_number_input()    # Then this
+        self.setup_year_input()      # And then this
         self.setup_add_cvr_button()
-        self.setup_year_input()
         self.setup_combo_boxes()
         self.setup_submit_button()
         self.setup_add_item_button()
         self.delete_buttons = []
+        
 
     # Window Setup
     def setup_window(self):
@@ -38,7 +42,7 @@ class MyApp(QMainWindow):
 
     # Box Setups
     def setup_boxes(self):
-        self.box = self.setup_box(25, 25, 300, 550)
+        self.box = self.setup_box(25, 25, 300, 370)
         self.box2 = self.setup_box(350, 25, 300, 550)
 
     def setup_box(self, x, y, width, height):
@@ -73,20 +77,31 @@ class MyApp(QMainWindow):
     def setup_inputs(self):
         self.setup_number_input()
         self.setup_year_input()
+        
+    def setup_new_text_input(self):
+        title_bottom = self.title_label.y() + self.title_label.height() + 10  # 10 is a margin
+        self.new_text_input = self.create_input(self.box, "New Text",
+                                                int((self.box.width() - InputStyles.WIDTH) / 2),
+                                                title_bottom)
+   
 
     def setup_number_input(self):
+        new_text_input_bottom = self.new_text_input.y() + self.new_text_input.height() + 10  # 10 is a margin
         self.number_input = self.create_input(self.box, "CVR Nummer",
-                                              int((self.box.width() - InputStyles.WIDTH) / 2),
-                                              int(self.box.height() - 5 * Sizing.SUBMIT_BUTTON_HEIGHT))
+                                            int((self.box.width() - InputStyles.WIDTH) / 2),
+                                            new_text_input_bottom)
         number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
         self.number_input.setValidator(number_validator)
 
+
     def setup_year_input(self):
+        number_input_bottom = self.number_input.y() + self.number_input.height() + 10  # 10 is a margin
         self.year_input = self.create_input(self.box, "År",
                                             int((self.box.width() - InputStyles.WIDTH) / 2),
-                                            int(self.box.height() - 3 * Sizing.SUBMIT_BUTTON_HEIGHT - 40))
+                                            number_input_bottom)
         year_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{4}$"))
         self.year_input.setValidator(year_validator)
+
 
     # Button Setups
     def setup_buttons(self):
@@ -104,14 +119,14 @@ class MyApp(QMainWindow):
         self.add_cvr_btn.clicked.connect(self.addNumberInputField)
 
     def setup_submit_button(self):
+        start_y = self.combo2.y() + self.combo2.height() + 10  # Start below the combo2
         self.submit_btn = HoverButton("Start", self.box)
         self.submit_btn.setGeometry(
             int((self.box.width() - Sizing.SUBMIT_BUTTON_WIDTH) / 2),
-            int(self.box.height() - Sizing.SUBMIT_BUTTON_HEIGHT - 20),
+            start_y,
             Sizing.SUBMIT_BUTTON_WIDTH,
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
-        self.submit_btn.clicked.connect(self.printYearAndMonths)
         
     
     
@@ -126,6 +141,7 @@ class MyApp(QMainWindow):
         
     def setup_combo_boxes(self):
         start_x = int((self.box.width() - 2 * ComboBoxStyles.WIDTH - 15) / 2)
+        start_y = self.year_input.y() + self.year_input.height() + 10  # Start below the year_input
         
         # Setup for combo1
         self.combo1 = ClickableComboBox(self.box)
@@ -134,7 +150,7 @@ class MyApp(QMainWindow):
         self.combo1.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.combo1.setGeometry(
             start_x,
-            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),
+            start_y,
             ComboBoxStyles.WIDTH,
             ComboBoxStyles.HEIGHT
         )
@@ -148,7 +164,7 @@ class MyApp(QMainWindow):
         self.combo2.lineEdit().setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.combo2.setGeometry(
             start_x + ComboBoxStyles.WIDTH + 15,
-            int(self.box.height() - 2 * Sizing.SUBMIT_BUTTON_HEIGHT - 30),
+            start_y,
             ComboBoxStyles.WIDTH,
             ComboBoxStyles.HEIGHT
         )
@@ -184,14 +200,34 @@ class MyApp(QMainWindow):
         print(f"Year: {year}, Month 1: {month1}, Month 2: {month2}")
 
     def addNumberInputField(self):
-        self.original_input_y = self.number_input.y()
-        self.number_input.move(self.number_input.x(),
-                            self.original_input_y - InputStyles.HEIGHT - 10)
-        new_input_y = self.number_input.y() + InputStyles.HEIGHT + 10
+        # Store the original y-coordinate of the year_input if it hasn't been stored yet
+        if not hasattr(self, 'original_year_input_y'):
+            self.original_year_input_y = self.year_input.y()
+
+        # Calculate the new y-coordinate for the year_input
+        year_input_new_y = self.original_year_input_y + InputStyles.HEIGHT + 10
+        self.year_input.move(self.year_input.x(), year_input_new_y)
+
+        # Create the new input field directly below the first CVR input
+        new_input_y = self.number_input.y() + self.number_input.height() + 10  # Added a 10-pixel gap for spacing
         new_input = self.create_input(self.box, "2. CVR",
                                     int((self.box.width() - InputStyles.WIDTH) / 2), new_input_y)
         new_input.show()
         self.additional_inputs.append(new_input)
+
+
+
+        # Increase the height of the box
+        self.box.setFixedHeight(self.original_box_height + InputStyles.HEIGHT + 10)
+
+
+
+
+
+        # Move the comboboxes and submit button down
+        self.combo1.move(self.combo1.x(), self.combo1.y() + InputStyles.HEIGHT + 10)
+        self.combo2.move(self.combo2.x(), self.combo2.y() + InputStyles.HEIGHT + 10)
+        self.submit_btn.move(self.submit_btn.x(), self.submit_btn.y() + InputStyles.HEIGHT + 10)
 
         # Delete the old remove_input_btn if it exists
         if hasattr(self, 'remove_input_btn') and self.remove_input_btn:
@@ -214,13 +250,26 @@ class MyApp(QMainWindow):
         self.remove_input_btn.show()
 
         self.add_cvr_btn.hide()
-
+        self.mousePressEvent(None)  # Clear focus from any widget
 
     def removeNumberInputField(self):
         if self.additional_inputs:  # Check if the list is not empty
             input_to_remove = self.additional_inputs.pop()
             input_to_remove.deleteLater()
-            self.number_input.move(self.number_input.x(), self.original_input_y)
+
+            # Move the year_input back to its original position
+            if hasattr(self, 'original_year_input_y'):
+                self.year_input.move(self.year_input.x(), self.original_year_input_y)
+
+            # Move the comboboxes and submit button up
+            self.combo1.move(self.combo1.x(), self.combo1.y() - InputStyles.HEIGHT - 10)
+            self.combo2.move(self.combo2.x(), self.combo2.y() - InputStyles.HEIGHT - 10)
+            self.submit_btn.move(self.submit_btn.x(), self.submit_btn.y() - InputStyles.HEIGHT - 10)
+
+
+            # Restore the original height of the box
+            self.box.setFixedHeight(self.original_box_height)
+
             self.add_cvr_btn.show()
 
             # Delete the remove_input_btn
@@ -228,11 +277,17 @@ class MyApp(QMainWindow):
                 self.remove_input_btn.deleteLater()
                 del self.remove_input_btn  # Explicitly delete the reference
 
+
+
+
+
     def mousePressEvent(self, event):
         focused_widget = QApplication.instance().focusWidget()
         if isinstance(focused_widget, (QLineEdit, QComboBox)):
             focused_widget.clearFocus()
-        super().mousePressEvent(event)
+        if event:  # Check if event is not None before calling the superclass method
+            super().mousePressEvent(event)
+
         
         
         
