@@ -43,7 +43,7 @@ class MyApp(QMainWindow):
     # Box Setups
     def setup_boxes(self):
         self.box = self.setup_box(25, 25, 300, 370)
-        self.box2 = self.setup_box(350, 25, 300, 550)
+        self.box2 = self.setup_box(350, 25, 400, 550)
 
     def setup_box(self, x, y, width, height):
         box = QWidget(self)
@@ -80,14 +80,14 @@ class MyApp(QMainWindow):
         
     def setup_new_text_input(self):
         title_bottom = self.title_label.y() + self.title_label.height() + 10  # 10 is a margin
-        self.new_text_input = self.create_input(self.box, "New Text",
+        self.new_text_input = self.create_input(self.box, "Mit-ID",
                                                 int((self.box.width() - InputStyles.WIDTH) / 2),
                                                 title_bottom)
    
 
     def setup_number_input(self):
         new_text_input_bottom = self.new_text_input.y() + self.new_text_input.height() + 10  # 10 is a margin
-        self.number_input = self.create_input(self.box, "CVR Nummer",
+        self.number_input = self.create_input(self.box, "1. CVR",
                                             int((self.box.width() - InputStyles.WIDTH) / 2),
                                             new_text_input_bottom)
         number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
@@ -317,7 +317,7 @@ class MyApp(QMainWindow):
 
     def add_new_input_field(self, text=None):
         if self.input_fields_count < 10:  # Limit to 10 input fields
-            y_coordinate = 50 + self.input_fields_count * (Sizing.INPUT_HEIGHT - 10)
+            y_coordinate = 50 + self.input_fields_count * (Sizing.INPUT_HEIGHT - 10) + 5  # Adjusted by adding 5 pixels
             new_input = QLineEdit(self.box2)
             new_input.setGeometry(
                 int((self.box2.width() - Sizing.INPUT_WIDTH) / 2),
@@ -341,10 +341,11 @@ class MyApp(QMainWindow):
             delete_button = QPushButton("X", self.box2)
             delete_button.setGeometry(
                 new_input.x() + new_input.width() + 5,
-                y_coordinate,
+                y_coordinate + 20,
                 30,  # Width of the delete button
-                Sizing.INPUT_HEIGHT
+                30   # Height of the delete button (make it equal to width for a square shape)
             )
+
             delete_button.setStyleSheet(DeleteButtonStyles.STYLESHEET)
             delete_button.clicked.connect(partial(self.delete_input_field, new_input, delete_button))
             delete_button.show()
@@ -353,6 +354,7 @@ class MyApp(QMainWindow):
             self.delete_buttons.append(delete_button)
 
             self.input_fields_count += 1
+
 
     def delete_input_field(self, input_field, delete_button):
         # Get the index of the input field before removing it
@@ -364,26 +366,27 @@ class MyApp(QMainWindow):
         input_field.deleteLater()
         delete_button.deleteLater()
 
-        # Adjust positions of the remaining input fields and their delete buttons
+        # Reposition remaining input fields and their delete buttons
         for i in range(index, len(self.input_fields)):
             current_input = self.input_fields[i]
-            current_input.move(current_input.x(), current_input.y() - (Sizing.INPUT_HEIGHT - 10))
-            # Adjust the position and set a fixed height for the delete button as well
+            y_coordinate = 50 + i * (Sizing.INPUT_HEIGHT - 10) + 5  # Recalculated based on the current index
+            current_input.move(current_input.x(), y_coordinate)
             current_delete_button = self.delete_buttons[i]
             current_delete_button.setGeometry(
                 current_input.x() + current_input.width() + 5,
-                current_input.y(),
-                30,  # Width of the delete button
-                30   # Fixed height of 30px
+                y_coordinate + 20,
+                30,
+                30
             )
 
         self.input_fields_count -= 1
 
         # Save the data to the JSON file
         self.save_to_json()
-        
+
         # Repaint the widget to ensure the changes are immediately visible
         self.repaint()
+
 
 
 
