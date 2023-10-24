@@ -12,17 +12,7 @@ def web_scrap(nemid_text):
     driver.get("https://pdcs.skat.dk/portallogin/digitalSignatur?userType=virksomhed&amp;targetUrl=aHR0cHM6Ly9udHNlLnNrYXQuZGsvbnRzZS1mcm9udC9mb3JzaWRl")
 
 
-
-    """ driver.implicitly_wait(0.5)
-    cookie_button = driver.find_element(by=By.ID, value="declineButton")
-    login_button = driver.find_element(By.CSS_SELECTOR, "button.IconButton_IconButton_button__WbFlc")
-    borger_button = driver.find_element(By.CSS_SELECTOR, "collapser__header Collapse_Collapse_heading__mq8tn")
-    """
     time.sleep(5)
-
-    print("----- START PRINT -----")
-    print (nemid_text)
-    print("----- END PRINT -----")
     
     
     keyboard.type(nemid_text)
