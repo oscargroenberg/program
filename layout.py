@@ -16,8 +16,9 @@ class MyApp(QMainWindow):
         self.input_fields_count = 0 
         self.init_ui()
         self.input_fields = []  # List to store all input fields
-        self.load_data_and_populate_fields()
+        self.additional_inputs_box2 = []  # Initialize the list
         self.original_box_height = self.box.height()
+        self.load_input_fields()
 
 
     def init_ui(self):
@@ -300,104 +301,161 @@ class MyApp(QMainWindow):
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
         self.add_item_btn.setStyleSheet(ButtonStyles.STYLESHEET)
-        self.add_item_btn.clicked.connect(self.add_new_input_field)
-
-
-
-    def load_data_and_populate_fields(self):
-        try:
-            filepath = os.path.join('json_files', 'cvr.json')
-            with open(filepath, 'r') as file:
-                data = json.load(file)
-            
-            for item in data:
-                self.add_new_input_field(item["data"])
-        except FileNotFoundError:
-            pass  # Handle the case where the file doesn't exist yet
-
-    def add_new_input_field(self, text=None):
-        if self.input_fields_count < 10:  # Limit to 10 input fields
-            y_coordinate = 50 + self.input_fields_count * (Sizing.INPUT_HEIGHT - 10) + 5  # Adjusted by adding 5 pixels
-            x_coordinate = int((self.box2.width() - Sizing.INPUT_WIDTH + 140) / 2) + 70  # Adjusted x-coordinate with +20
-            
-            new_input = QLineEdit(self.box2)
-            new_input.setGeometry(
-                x_coordinate,
-                y_coordinate,
-                Sizing.INPUT_WIDTH - 140,  # Adjusted width
-                Sizing.INPUT_HEIGHT
-            )
-            new_input.setStyleSheet(InputFieldStyles.STYLESHEET)
-            
-            # Set the validator to ensure 8 digits
-            eight_digit_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{8}$"))
-            new_input.setValidator(eight_digit_validator)
-            
-            new_input.editingFinished.connect(self.save_to_json)
-            if text:  # If text is provided, set it
-                new_input.setText(text)
-            new_input.show()
-            self.input_fields.append(new_input)  # Add the new input to the list
-
-            # Create delete button
-            delete_button = QPushButton("X", self.box2)
-            delete_button.setGeometry(
-                x_coordinate + new_input.width() + 5,  # Adjusted x-coordinate
-                y_coordinate + 20,
-                30,  # Width of the delete button
-                30   # Height of the delete button (make it equal to width for a square shape)
-            )
-
-            delete_button.setStyleSheet(DeleteButtonStyles.STYLESHEET)
-            delete_button.clicked.connect(partial(self.delete_input_field, new_input, delete_button))
-            delete_button.show()
-
-            # Add the delete button to the list
-            self.delete_buttons.append(delete_button)
-
-            self.input_fields_count += 1
+        self.add_item_btn.clicked.connect(self.add_input_fields)
 
     
+    
+    
+    def load_input_fields(self):
+        json_file_path = os.path.join('json_files', 'cvr.json')
+        if os.path.exists(json_file_path):
+            with open(json_file_path, 'r') as f:
+                data = json.load(f)
+                for entry in data:
+                    self.add_input_fields(text=entry.get('text', ''), number=entry.get('number', ''))
 
-    def delete_input_field(self, input_field, delete_button):
-        # Get the index of the input field before removing it
-        index = self.input_fields.index(input_field)
+    
+    
+    
+    
+    
+    
+    
 
-        # Remove the input field and its delete button
-        self.input_fields.remove(input_field)
-        self.delete_buttons.remove(delete_button)  # Remove the delete button from the list
-        input_field.deleteLater()
+    def add_input_fields(self, text='', number=''):
+        # Ensure text and number are strings
+        text = str(text)
+        number = str(number)
+        # Check if the maximum number of input fields has been reached
+        if hasattr(self, 'additional_inputs_box2') and len(self.additional_inputs_box2) >= 10:
+            return  # Exit the function
+
+        # Calculate the starting y-coordinate for the new input fields
+        start_y = 50  # You can adjust this value as needed
+        
+        # If there are already input fields present, adjust the start_y value
+        if hasattr(self, 'additional_inputs_box2') and self.additional_inputs_box2:
+            last_input_field = self.additional_inputs_box2[-1]
+            start_y = last_input_field[0].y() + last_input_field[0].height() + 22
+        
+        input_width = int((Sizing.INPUT_WIDTH - 5) / 2)  # Adjusted input width to include space
+        input_height = 20  # Set a fixed height for the input fields
+        
+        # Define the stylesheet with adjusted padding for placeholder text
+        adjusted_style = InputFieldStyles.STYLESHEET + "padding-top: -50px;"  # Adjust the padding as needed
+        
+        # Create the text input field
+        text_input = QLineEdit(self.box2)
+        text_input.setGeometry(30, start_y, input_width, input_height)
+        text_input.setPlaceholderText("Text")
+
+        # Set a validator to allow only letters and spaces, and limit to 8 characters
+        text_validator = QRegularExpressionValidator(QRegularExpression(r"^[a-zA-Z\s]{0,8}$"))
+        text_input.setValidator(text_validator)
+
+        text_input.setStyleSheet(adjusted_style)  # Apply adjusted styling
+        text_input.textChanged.connect(lambda: self.update_json_file())  # Connect textChanged signal
+        text_input.show()
+        text_input.setText(text)  # Set the text of the input field
+
+        # Create the number input field
+        number_input = QLineEdit(self.box2)
+        number_input.setGeometry(30 + input_width + 5, start_y, input_width, input_height)  # Adjusted x position
+        number_input.setPlaceholderText("Number")
+        number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{0,8}$"))
+        number_input.setValidator(number_validator)
+        number_input.setStyleSheet(adjusted_style)  # Apply adjusted styling
+        number_input.textChanged.connect(lambda: self.validate_number_input() and self.update_json_file())  # Connect textChanged signal
+        number_input.show()
+        number_input.setText(number)  # Set the text of the input field
+        
+        # Create the delete button
+        delete_button = QPushButton('X', self.box2)
+        delete_button.setGeometry(30 + input_width * 2 + 10, start_y - 10, 30, 30)  # Moved up by 10px
+        delete_button.setStyleSheet(DeleteButtonStyles.STYLESHEET)
+        delete_button.clicked.connect(lambda: self.delete_input_fields(text_input, number_input, delete_button))
+        delete_button.show()
+        
+        # Store the input fields and delete button in a list for future reference
+        if not hasattr(self, 'additional_inputs_box2'):
+            self.additional_inputs_box2 = []
+        self.additional_inputs_box2.append((text_input, number_input, delete_button))
+
+        # Add the input fields to the JSON file
+        self.update_json_file()
+
+
+    def update_json_file(self):
+        if not self.validate_number_input():
+            return  # Skip updating if total digit count exceeds 8
+
+        # Define the path to the JSON file
+        json_file_path = os.path.join('json_files', 'cvr.json')
+
+        # Prepare the data to be written to the JSON file
+        data = []
+        if hasattr(self, 'additional_inputs_box2'):
+            for text_input, number_input, _ in self.additional_inputs_box2:
+                text = text_input.text()
+                number = number_input.text()
+                data.append({'text': text, 'number': number})
+
+        # Write the updated data back to the JSON file
+        with open(json_file_path, 'w') as f:
+            json.dump(data, f, indent=4)
+            
+    def validate_number_input(self):
+        total_characters = sum(len(input_field.text()) for input_field, _, _ in self.additional_inputs_box2)
+        total_digits = sum(len(number_input.text()) for _, number_input, _ in self.additional_inputs_box2)
+        
+        return total_characters <= 8 and total_digits <= 8
+
+
+
+
+
+    def delete_input_fields(self, text_input, number_input, delete_button):
+        # Find the index of the input fields to be deleted
+        index = self.additional_inputs_box2.index((text_input, number_input, delete_button))
+        
+        # Delete the input fields and button
+        text_input.deleteLater()
+        number_input.deleteLater()
         delete_button.deleteLater()
+        
+        # Remove the input fields and button from the list
+        del self.additional_inputs_box2[index]
+        
+        # Move up all input fields and buttons that come after the deleted one
+        for i in range(index, len(self.additional_inputs_box2)):
+            text, number, button = self.additional_inputs_box2[i]
+            y = text.y() - text.height() - 22  # Calculate new y position
+            text.setGeometry(text.x(), y, text.width(), text.height())
+            number.setGeometry(number.x(), y, number.width(), number.height())
+            button.setGeometry(button.x(), y - 10, button.width(), button.height())  # Adjust for delete button's offset
 
-        # Reposition remaining input fields and their delete buttons
-        for i in range(index, len(self.input_fields)):
-            current_input = self.input_fields[i]
-            y_coordinate = 50 + i * (Sizing.INPUT_HEIGHT - 10) + 5  # Recalculated based on the current index
-            current_input.move(current_input.x(), y_coordinate)
-            current_delete_button = self.delete_buttons[i]
-            current_delete_button.setGeometry(
-                current_input.x() + current_input.width() + 5,
-                y_coordinate + 20,
-                30,
-                30
-            )
+        # Delete the input fields from the JSON file
+        self.delete_from_json_file(index)
 
-        self.input_fields_count -= 1
+    def delete_from_json_file(self, index):
+        # Define the path to the JSON file
+        json_file_path = os.path.join('json_files', 'cvr.json')
 
-        # Save the data to the JSON file
-        self.save_to_json()
+        # Check if the JSON file exists
+        if not os.path.exists(json_file_path):
+            return  # Exit the function if the file does not exist
 
-        # Repaint the widget to ensure the changes are immediately visible
-        self.repaint()
+        # Read the existing data from the JSON file
+        with open(json_file_path, 'r') as f:
+            data = json.load(f)
 
+        # Check if the index is valid
+        if index < 0 or index >= len(data):
+            return  # Exit the function if the index is invalid
 
+        # Remove the input fields at the specified index from the data
+        del data[index]
 
-
-
-
-
-    def save_to_json(self):
-        data = [{"data": input_field.text()} for input_field in self.input_fields]
-        filepath = os.path.join('json_files', 'cvr.json')
-        with open(filepath, 'w') as file:
-            json.dump(data, file)
+        # Write the updated data back to the JSON file
+        with open(json_file_path, 'w') as f:
+            json.dump(data, f, indent=4)

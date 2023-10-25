@@ -193,9 +193,10 @@ class InputFieldStyles:
             border-bottom: 1px solid black;
             border-radius: 0;
             font-size: 16px;
-            padding: 0 0 -20px 0;
+            padding: 0px;
         }
     """
+
 
 
 
