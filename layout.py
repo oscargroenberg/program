@@ -312,7 +312,10 @@ class MyApp(QMainWindow):
             with open(json_file_path, 'r') as f:
                 data = json.load(f)
                 for entry in data:
-                    self.add_input_fields(text=entry.get('text', ''), number=entry.get('number', ''))
+                    text = str(entry.get('text', ''))
+                    number = str(entry.get('number', ''))
+                    self.add_input_fields(text=text, number=number)
+
 
     
     
@@ -322,7 +325,7 @@ class MyApp(QMainWindow):
     
     
 
-    def add_input_fields(self, text='', number=''):
+    def add_input_fields(self, *, text='', number=''):
         # Ensure text and number are strings
         text = str(text)
         number = str(number)
@@ -347,7 +350,7 @@ class MyApp(QMainWindow):
         # Create the text input field
         text_input = QLineEdit(self.box2)
         text_input.setGeometry(30, start_y, input_width, input_height)
-        text_input.setPlaceholderText("Text")
+        text_input.setPlaceholderText("Firma")
 
         # Set a validator to allow only letters and spaces, and limit to 8 characters
         text_validator = QRegularExpressionValidator(QRegularExpression(r"^[a-zA-Z\s]{0,8}$"))
@@ -361,7 +364,7 @@ class MyApp(QMainWindow):
         # Create the number input field
         number_input = QLineEdit(self.box2)
         number_input.setGeometry(30 + input_width + 5, start_y, input_width, input_height)  # Adjusted x position
-        number_input.setPlaceholderText("Number")
+        number_input.setPlaceholderText("CVR")
         number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d{0,8}$"))
         number_input.setValidator(number_validator)
         number_input.setStyleSheet(adjusted_style)  # Apply adjusted styling
