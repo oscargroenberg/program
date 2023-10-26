@@ -20,13 +20,8 @@ def web_scrap(nemid_text):
     keyboard.release(Key.enter)
 
     time.sleep(2)
-    """ cookie_button.click() """
-    time.sleep(2)
-    """ login_button.click() """
-    """ bruger_textbox.send_keys("CVR") """
-    time.sleep(1)
-    """ borger_button.click() """
-    time.sleep(2)
+   
+    
 
     time.sleep(10)
     driver.quit()
