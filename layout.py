@@ -15,8 +15,8 @@ class MyApp(QMainWindow):
         self.additional_inputs = []
         self.input_fields_count = 0 
         self.init_ui()
-        self.input_fields = []  # List to store all input fields
-        self.additional_inputs_box2 = []  # Initialize the list
+        self.input_fields = []
+        self.additional_inputs_box2 = []
         self.original_box_height = self.box.height()
         self.load_input_fields()
 
@@ -26,9 +26,11 @@ class MyApp(QMainWindow):
         self.setup_boxes()
         self.setup_title()
         self.setup_box2_title()
-        self.setup_new_text_input()  # This should be called first
-        self.setup_number_input()    # Then this
-        self.setup_year_input()      # And then this
+        self.setup_new_text_input()
+        self.setup_number_input()
+        self.setup_visma_username()
+        self.setup_visma_password()
+        self.setup_year_input()
         self.setup_add_cvr_button()
         self.setup_combo_boxes()
         self.setup_submit_button()
@@ -43,7 +45,7 @@ class MyApp(QMainWindow):
 
     # Box Setups
     def setup_boxes(self):
-        self.box = self.setup_box(25, 25, 300, 370)
+        self.box = self.setup_box(25, 25, 300, 490)
         self.box2 = self.setup_box(350, 25, 300, 550)
 
     def setup_box(self, x, y, width, height):
@@ -73,11 +75,6 @@ class MyApp(QMainWindow):
         self.title_label.raise_()
         self.title_label.show()
 
-
-    # Input Setups
-    def setup_inputs(self):
-        self.setup_number_input()
-        self.setup_year_input()
         
     def setup_new_text_input(self):
         title_bottom = self.title_label.y() + self.title_label.height() + 10  # 10 is a margin
@@ -95,8 +92,26 @@ class MyApp(QMainWindow):
         self.number_input.setValidator(number_validator)
 
 
+    def setup_visma_username(self):
+        new_text_input_bottom = self.new_text_input.y() + self.new_text_input.height() + 70  # 10 is a margin
+        self.first_additional_input = self.create_input(self.box, "VismaLøn Brugernavn",
+                                                        int((self.box.width() - InputStyles.WIDTH) / 2),
+                                                        new_text_input_bottom)
+
+    def setup_visma_password(self):
+        first_additional_input_bottom = self.first_additional_input.y() + self.first_additional_input.height() + 10  # 10 is a margin
+        self.second_additional_input = self.create_input(self.box, "VismaLøn Password",
+                                                        int((self.box.width() - InputStyles.WIDTH) / 2),
+                                                        first_additional_input_bottom)
+
+
+
+
+
+
+
     def setup_year_input(self):
-        number_input_bottom = self.number_input.y() + self.number_input.height() + 10  # 10 is a margin
+        number_input_bottom = self.number_input.y() + self.number_input.height() + 130  # 10 is a margin
         self.year_input = self.create_input(self.box, "År",
                                             int((self.box.width() - InputStyles.WIDTH) / 2),
                                             number_input_bottom)
@@ -128,6 +143,8 @@ class MyApp(QMainWindow):
             Sizing.SUBMIT_BUTTON_WIDTH,
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
+        self.submit_btn.setStyleSheet(ButtonStyles.STYLESHEET)
+        self.submit_btn.clicked.connect(self.print_input_values)  # Connect the clicked signal to print_input_values
         
     
     
@@ -201,9 +218,13 @@ class MyApp(QMainWindow):
         print(f"Year: {year}, Month 1: {month1}, Month 2: {month2}")
 
     def addNumberInputField(self):
-        # Store the original y-coordinate of the year_input if it hasn't been stored yet
+        # Store the original y-coordinates if they haven't been stored yet
         if not hasattr(self, 'original_year_input_y'):
             self.original_year_input_y = self.year_input.y()
+        if not hasattr(self, 'original_first_additional_input_y'):
+            self.original_first_additional_input_y = self.first_additional_input.y()
+        if not hasattr(self, 'original_second_additional_input_y'):
+            self.original_second_additional_input_y = self.second_additional_input.y()
 
         # Calculate the new y-coordinate for the year_input
         year_input_new_y = self.original_year_input_y + InputStyles.HEIGHT + 10
@@ -216,14 +237,12 @@ class MyApp(QMainWindow):
         new_input.show()
         self.additional_inputs.append(new_input)
 
-
+        # Move the additional inputs down
+        self.first_additional_input.move(self.first_additional_input.x(), self.original_first_additional_input_y + InputStyles.HEIGHT + 10)
+        self.second_additional_input.move(self.second_additional_input.x(), self.original_second_additional_input_y + InputStyles.HEIGHT + 10)
 
         # Increase the height of the box
-        self.box.setFixedHeight(self.original_box_height + InputStyles.HEIGHT + 10)
-
-
-
-
+        self.box.setFixedHeight(self.box.height() + InputStyles.HEIGHT + 10)
 
         # Move the comboboxes and submit button down
         self.combo1.move(self.combo1.x(), self.combo1.y() + InputStyles.HEIGHT + 10)
@@ -238,9 +257,7 @@ class MyApp(QMainWindow):
         self.remove_input_btn = QPushButton("", self.box)
         icon_path = os.path.join("images", "cross_good.png")
         self.remove_input_btn.setIcon(QIcon(icon_path))
-        
         self.remove_input_btn.setIconSize(QSize(10, 10))  # Adjust the size as needed
-
         self.remove_input_btn.setGeometry(
             int((self.box.width() + InputStyles.WIDTH) / 2) + 5,
             new_input_y + 10,
@@ -253,6 +270,7 @@ class MyApp(QMainWindow):
         self.add_cvr_btn.hide()
         self.mousePressEvent(None)  # Clear focus from any widget
 
+
     def removeNumberInputField(self):
         if self.additional_inputs:  # Check if the list is not empty
             input_to_remove = self.additional_inputs.pop()
@@ -262,11 +280,12 @@ class MyApp(QMainWindow):
             if hasattr(self, 'original_year_input_y'):
                 self.year_input.move(self.year_input.x(), self.original_year_input_y)
 
-            # Move the comboboxes and submit button up
+            # Move the comboboxes, submit button, and additional inputs up
             self.combo1.move(self.combo1.x(), self.combo1.y() - InputStyles.HEIGHT - 10)
             self.combo2.move(self.combo2.x(), self.combo2.y() - InputStyles.HEIGHT - 10)
             self.submit_btn.move(self.submit_btn.x(), self.submit_btn.y() - InputStyles.HEIGHT - 10)
-
+            self.first_additional_input.move(self.first_additional_input.x(), self.first_additional_input.y() - InputStyles.HEIGHT - 10)
+            self.second_additional_input.move(self.second_additional_input.x(), self.second_additional_input.y() - InputStyles.HEIGHT - 10)
 
             # Restore the original height of the box
             self.box.setFixedHeight(self.original_box_height)
@@ -315,15 +334,6 @@ class MyApp(QMainWindow):
                     text = str(entry.get('text', ''))
                     number = str(entry.get('number', ''))
                     self.add_input_fields(text=text, number=number)
-
-
-    
-    
-    
-    
-    
-    
-    
 
     def add_input_fields(self, *, text='', number=''):
         # Ensure text and number are strings
@@ -462,3 +472,31 @@ class MyApp(QMainWindow):
         # Write the updated data back to the JSON file
         with open(json_file_path, 'w') as f:
             json.dump(data, f, indent=4)
+            
+            
+            
+            
+            
+        
+        
+        
+    def print_input_values(self):
+        mit_id = self.new_text_input.text()
+        cvr1 = self.number_input.text()
+        cvr2 = self.additional_inputs[0].text() if self.additional_inputs else ""
+        vismalon_username = self.first_additional_input.text()
+        vismalon_password = self.second_additional_input.text()
+        year = self.year_input.text()
+        month1 = self.combo1.currentText()
+        month2 = self.combo2.currentText()
+
+        print(f"Mit-ID: {mit_id}, 1. CVR: {cvr1}, 2. CVR: {cvr2}, VismaLøn Brugernavn: {vismalon_username}, "
+              f"VismaLøn Password: {vismalon_password}, Year: {year}, Month 1: {month1}, Month 2: {month2}")
+        # Clear all input fields
+        self.new_text_input.clear()
+        self.number_input.clear()
+        if self.additional_inputs:
+            self.additional_inputs[0].clear()
+        self.first_additional_input.clear()
+        self.second_additional_input.clear()
+        self.year_input.clear()
