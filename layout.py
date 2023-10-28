@@ -8,6 +8,7 @@ from widgets.clickable_line_edit import ClickableLineEdit
 from widgets.clickable_combo_box import ClickableComboBox
 from functools import partial
 import os
+from visma_løn_login import visma_løn_login_func
 
 class MyApp(QMainWindow):
     def __init__(self):
@@ -90,6 +91,7 @@ class MyApp(QMainWindow):
                                             new_text_input_bottom)
         number_validator = QRegularExpressionValidator(QRegularExpression(r"^\d+$"))
         self.number_input.setValidator(number_validator)
+        return self.number_input.text()
 
 
     def setup_visma_username(self):
@@ -97,12 +99,14 @@ class MyApp(QMainWindow):
         self.first_additional_input = self.create_input(self.box, "VismaLøn Brugernavn",
                                                         int((self.box.width() - InputStyles.WIDTH) / 2),
                                                         new_text_input_bottom)
+        return self.first_additional_input.text()
 
     def setup_visma_password(self):
         first_additional_input_bottom = self.first_additional_input.y() + self.first_additional_input.height() + 10  # 10 is a margin
         self.second_additional_input = self.create_input(self.box, "VismaLøn Password",
                                                         int((self.box.width() - InputStyles.WIDTH) / 2),
                                                         first_additional_input_bottom)
+        return self.second_additional_input.text()
 
 
 
@@ -143,8 +147,14 @@ class MyApp(QMainWindow):
             Sizing.SUBMIT_BUTTON_WIDTH,
             Sizing.SUBMIT_BUTTON_HEIGHT
         )
-        self.submit_btn.setStyleSheet(ButtonStyles.STYLESHEET)
-        self.submit_btn.clicked.connect(self.print_input_values)  # Connect the clicked signal to print_input_values
+        self.submit_btn.clicked.connect(self.on_submit_button_clicked)
+
+    def on_submit_button_clicked(self):    
+        
+        brugernavn_value = self.first_additional_input.text()
+        password_value = self.second_additional_input.text()
+        cvr_value = self.number_input.text()
+        visma_løn_login_func(brugernavn_value, password_value, cvr_value)  # Connect the clicked signal to print_input_values
         
     
     

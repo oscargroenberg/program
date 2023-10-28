@@ -3,3 +3,5 @@ pyqt6-plugins
 PyQt6-Qt6
 PyQt6-sip
 pyqt6-tools
+selenium
+pynput
