@@ -1,45 +1,80 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver import ActionChains
 import time
 
 
 
 def visma_løn_login_func(brugernavn_text, password_text, cvr_text):
     driver = webdriver.Chrome()
+    hold = WebDriverWait(driver, 10)
+    long_hold = WebDriverWait(driver, 100)
     
     driver.get("https://logon.bluegarden.dk/?applicationname=MLE-MSEUI")
-    time.sleep(2)
-    cvr_box = driver.find_element(By.ID, "cvr")
-    brugernavn_box = driver.find_element(By.ID, "userName")
-    password_box = driver.find_element(By.ID, "password")
-    sumbit_button = driver.find_element(By.ID, "btnNext")
+ 
+    """ cvr_box = driver.find_element(By.ID, "cvr") """
+    cvr_box = hold.until(EC.presence_of_element_located((By.ID, "cvr")))
+    """ brugernavn_box = driver.find_element(By.ID, "userName") """
+    brugernavn_box = hold.until(EC.presence_of_element_located((By.ID, "userName")))   
+    """ password_box = driver.find_element(By.ID, "password") """
+    password_box = hold.until(EC.presence_of_element_located((By.ID, "password")))
+    """ sumbit_button = driver.find_element(By.ID, "btnNext") """
+    sumbit_button = hold.until(EC.presence_of_element_located((By.ID, "btnNext")))
     
+    print(brugernavn_text, password_text, cvr_text)
     
-    
-    time.sleep(1)
     cvr_box.send_keys("48117716")
-    brugernavn_box.send_keys(brugernavn_text)
-    password_box.send_keys(password_text)
-    time.sleep(10)
+
+    brugernavn_box.send_keys("emil.pedersen@visma.com")
+
+    password_box.send_keys("Blomsten451099")
+
+    """ email_btn = driver.find_element(By.ID, "email") """
+    email_btn = hold.until(EC.presence_of_element_located((By.ID, "email")))
+    email_btn.click()
+
     sumbit_button.click()
-    time.sleep(30)
+    
     print("login done")
-    ok_button = driver.find_element(By.ID, "OK")
-    input_element = driver.find_element(By.NAME, "filterField")
-    input_element.send_keys(cvr_text)
-    ok_button.click()
+
+   
     time.sleep(1)
-    rapport1_btn = driver.find_element(By.ID, "sd41")
-    raport2_btn = driver.find_element(By.ID, "sd42")
-    rapport1_btn.click()
-    time.sleep(0.5)
+    """ input_element = driver.find_element(By.NAME, "filterField") """
+    input_element = hold.until(EC.presence_of_element_located((By.NAME, "filterField")))
+    input_element.send_keys(cvr_text)
+
+    """ ok_button = driver.find_element(By.ID, "OK") """
+    ok_button = long_hold.until(EC.presence_of_element_located((By.NAME, "OK")))
+    ok_button.click()
+
+    
+    """ rapport1_btn = driver.find_element(By.ID, "sd41") """
+    
+    rapport_menu = hold.until(EC.element_to_be_clickable((By.ID, "sd41")))
+    hover = ActionChains(driver).move_to_element(rapport_menu)
+    hover.perform()
+    rapport_menu.click()
+    
+
+
+    raport2_btn = long_hold.until(EC.element_to_be_clickable((By.ID, "sd42")))
+    hover2 = ActionChains(driver).move_to_element(raport2_btn)
+    hover2.perform()
     raport2_btn.click()
 
-
-
-    time.sleep(10)
+    iframe = hold.until(EC.presence_of_element_located((By.ID, "FContent")))
+    driver.switch_to.frame(iframe)
+    """ dropdown = driver.find_element(By.ID, "selectAktuelMenus") """
+    dropdown = hold.until(EC.element_to_be_clickable((By.ID, "selectAktuelMenus")))
+    select = Select(dropdown)
+    select.select_by_visible_text("Afstemningsliste eIndkomst (år til dato)")
+   
+    
 
     
-    time.sleep(10)
+    
     driver.quit()
