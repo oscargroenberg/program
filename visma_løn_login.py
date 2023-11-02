@@ -73,8 +73,22 @@ def visma_løn_login_func(brugernavn_text, password_text, cvr_text):
     select = Select(dropdown)
     select.select_by_visible_text("Afstemningsliste eIndkomst (år til dato)")
    
-    
+    continue_btn = hold.until(EC.presence_of_element_located((By.NAME, "ok")))
+    continue_btn.click()
 
+
+    def color_match(driver):
+        download_btn = long_hold.until(EC.element_to_be_clickable((By.NAME, "download")))
+        color = download_btn.value_of_css_property("background-color")
+        return color == 'rgb(49, 99, 132)'
+    download_btn = long_hold.until(EC.element_to_be_clickable((By.NAME, "download")))
+    """ hover3 = ActionChains(driver).move_to_element(download_btn)
+    hover3.perform """
+   
+    hold.until(color_match)
+    download_btn.click
+
+    print("done")
     
     
     driver.quit()
