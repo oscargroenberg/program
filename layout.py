@@ -267,7 +267,7 @@ class MyApp(QMainWindow):
                 data = json.load(file)
             
             for item in data:
-                self.add_new_input_field(item["data"])
+                """ self.add_new_input_field(item["data"]) """
         except FileNotFoundError:
             pass  # Handle the case where the file doesn't exist yet
 
