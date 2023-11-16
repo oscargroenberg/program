@@ -11,10 +11,13 @@ import time
 
 def visma_løn_login_func(brugernavn_text, password_text, cvr_text):
     driver = webdriver.Chrome()
+    driver.get("https://logon.bluegarden.dk/?applicationname=MLE-MSEUI")
     hold = WebDriverWait(driver, 10)
     long_hold = WebDriverWait(driver, 100)
     
-    driver.get("https://logon.bluegarden.dk/?applicationname=MLE-MSEUI")
+    
+    
+    
  
     """ cvr_box = driver.find_element(By.ID, "cvr") """
     cvr_box = hold.until(EC.presence_of_element_located((By.ID, "cvr")))
@@ -29,9 +32,9 @@ def visma_løn_login_func(brugernavn_text, password_text, cvr_text):
     
     cvr_box.send_keys("48117716")
 
-    brugernavn_box.send_keys("emil.pedersen@visma.com")
+    brugernavn_box.send_keys(brugernavn_text)
 
-    password_box.send_keys("Blomsten451099")
+    password_box.send_keys(password_text)
 
     """ email_btn = driver.find_element(By.ID, "email") """
     email_btn = hold.until(EC.presence_of_element_located((By.ID, "email")))
@@ -44,7 +47,7 @@ def visma_løn_login_func(brugernavn_text, password_text, cvr_text):
    
     time.sleep(1)
     """ input_element = driver.find_element(By.NAME, "filterField") """
-    input_element = hold.until(EC.presence_of_element_located((By.NAME, "filterField")))
+    input_element = long_hold.until(EC.presence_of_element_located((By.NAME, "filterField")))
     input_element.send_keys(cvr_text)
 
     """ ok_button = driver.find_element(By.ID, "OK") """
